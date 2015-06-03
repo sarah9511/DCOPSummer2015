@@ -14,7 +14,7 @@ public class AgentParseHandler extends DefaultHandler{
 	private Variable thingy;
 	private Domain domain;
 	
-	static int tagType = -1; // 1= var 2=Domain   
+	static int tagType = -1; // 1=var 2=Domain 3=agent  
 	
 	public AgentParseHandler(){
 		

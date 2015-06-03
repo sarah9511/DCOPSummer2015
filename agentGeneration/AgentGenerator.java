@@ -24,8 +24,8 @@ public class AgentGenerator{
 			vars = handler.getVars();
 			doms = handler.getDoms();
 			
-			for(Domain dom : doms){  //agents and domains successfully generated
-				System.out.println(dom.domainName);
+			for(Variable var : vars){  //agents and domains successfully generated
+				System.out.println(var.agentName);
 			}
 			
 		} catch (Exception e){

@@ -4,9 +4,10 @@ public class IntVariable extends Variable{
 	int value;
 	Domain dm;
 	
-	public IntVariable(String n, String dn, String agentName ){
+	public IntVariable(String n, String dn, String aName ){
 		name = n;
-		//dn = findDomainByName(dn);
+		domainName = dn;
+		agentName = aName;
 	}
 
 	// public Integer getValue(){
