@@ -4,7 +4,10 @@ import akka.actor.UntypedActor;
 
 public class Agent extends UntypedActor
 {
-	public Agent(int id)
+	static String name;
+	static List<Variable> assignedVars;
+	
+	public Agent(int id, String n)
 	{
 		name = n;
 		assignedVars = new ArrayList<Variable>();
