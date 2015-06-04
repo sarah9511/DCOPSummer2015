@@ -6,6 +6,8 @@ public class Agent extends UntypedActor
 {
 	public Agent(int id)
 	{
+		name = n;
+		assignedVars = new ArrayList<Variable>();
 		System.out.println("Agent created; ID: " + id);
 	}
 
@@ -16,6 +18,9 @@ public class Agent extends UntypedActor
 		if (message instanceof Integer)
 		{
 			//System.out.println("Agent created; ID: " + (Integer)message);
+		}
+		else if(message instanceof Variable){
+			assignedVars.add(message);
 		}
 		else
 		{

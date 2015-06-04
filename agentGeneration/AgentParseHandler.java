@@ -38,6 +38,10 @@ public class AgentParseHandler extends DefaultHandler{
 		return domList;
 	}
 	
+	public List<ActorRef> getAgents(){
+		return agentList;
+	}
+	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes)
 		throws SAXException
@@ -61,7 +65,7 @@ public class AgentParseHandler extends DefaultHandler{
 		else if (qName.equalsIgnoreCase("agent"))
 		{
 			tagType = 3;
-			agent = system.actorOf(Props.create(Agent.class, agentCounter), "agent" + agentCounter);
+			agent = system.actorOf(Props.create(Agent.class, agentCounter, attributes.getValue("name")), "agent" + agentCounter);
 			agentCounter++;
 			
 			//agent.tell(new Integer(agentCounter), null);

@@ -11,6 +11,7 @@ public class AgentGenerator{
 	
 	public static List<Variable> vars;
 	public static List<Domain> doms;
+	public static List<Agent> agents;
 	
 	public static void main(String args[]){
 		SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -23,7 +24,7 @@ public class AgentGenerator{
 			
 			vars = handler.getVars();
 			doms = handler.getDoms();
-			
+			agents = handler.getAgents();
 			for(Variable var : vars){  //agents and domains successfully generated
 				System.out.println(var.agentName);
 			}
