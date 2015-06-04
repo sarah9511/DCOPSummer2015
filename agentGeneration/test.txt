@@ -2,15 +2,7 @@
 
 	<presentation name="sampleProblem" maxConstraintArity="2" />
 
-	<agents nbAgents="3">
-
-		<agent name="agentX" />
-
-		<agent name="agentY" />
-
-		<agent name="agentZ" />
-
-	</agents>
+	
 
 	<domains nbDomains="1">
 
@@ -28,6 +20,16 @@
 
 
 	</variables>
+    
+    <agents nbAgents="3">
+
+		<agent name="agentX" />
+
+		<agent name="agentY" />
+
+		<agent name="agentZ" />
+
+	</agents>
 
 	<relations nbRelations="1">
 

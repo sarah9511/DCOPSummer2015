@@ -52,6 +52,7 @@ public class AgentParseHandler extends DefaultHandler{
 			if (attributes.getValue("datatype").equals("int")){
 				thingy = new IntVariable( attributes.getValue("name"), attributes.getValue("domain"), attributes.getValue("agent"));
 			}
+            
 			
 		}
 		else if (qName.equalsIgnoreCase("domain")){
@@ -64,10 +65,17 @@ public class AgentParseHandler extends DefaultHandler{
 		}
 		else if (qName.equalsIgnoreCase("agent"))
 		{
+            //because actor vars cannot be declared directly, must use attribute.getValue("name")
+            //  so, variables must be created first in xml file first
 			tagType = 3;
 			agent = system.actorOf(Props.create(Agent.class, agentCounter, attributes.getValue("name")), "agent" + agentCounter);
 			agentCounter++;
-			
+			for(Variable v: varList){
+                if (  v.agentName.equals( attributes.getValue("name") )  ){
+                    agent.tell(v, null);
+                }
+            }
+            
 			//agent.tell(new Integer(agentCounter), null);
 		}
 	}
@@ -82,7 +90,8 @@ public class AgentParseHandler extends DefaultHandler{
         }
 		else if (qName.equalsIgnoreCase("agent"))
 		{
-			agentList.add(agent);
+            
+            agentList.add(agent);
 		}
     }
 	
