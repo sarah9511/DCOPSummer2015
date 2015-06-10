@@ -1,5 +1,7 @@
 
+import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import akka.actor.SuppressedDeadLetter;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -23,7 +25,11 @@ public class Agent extends UntypedActor
 			//System.out.println("Agent created; ID: " + (Integer)message);
 		}
 		else if(message instanceof Variable){
+			System.err.println("Var received");
 			assignedVars.add( (Variable) message);
+			if (getSender() != null){
+				getSender().tell("got variable: " + ((Variable)message).name, null);
+			}
 		}
 		else if (message instanceof String){
 			if(  ((String)message).equals("out")  ){
@@ -33,7 +39,18 @@ public class Agent extends UntypedActor
 				}
 			} else if (((String)message).equals("getName")){
                 
-            }
+            } else if (((String)message).contains("got variable") ){
+				System.err.println( ((String)message).substring(13));
+			}
+			else 
+				System.out.println(  (String)message  );
+			
+		}
+		else if ( message instanceof AgentGenerator.PopulateMessage  ){
+			System.err.println("Populate Message Received" );
+			for( ActorRef a: ((AgentGenerator.PopulateMessage)message).toSend ){
+				a.tell( ((AgentGenerator.PopulateMessage)message).value, getSelf());
+			}
 			
 		}
 		else

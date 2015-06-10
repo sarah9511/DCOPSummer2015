@@ -8,6 +8,7 @@ public class IntVariable extends Variable{
 		name = n;
 		domainName = dn;
 		agentName = aName;
+		value = -1;
 	}
 
 	// public Integer getValue(){

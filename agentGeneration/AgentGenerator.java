@@ -44,14 +44,29 @@ public class AgentGenerator{
             
             
             
-			for(ActorRef a : agents){  //agents and domains successfully generated
+			//for(ActorRef a : agents){  //agents and domains successfully generated
 				//System.out.println(var.agentName);
-				a.tell("out" , null);
-			}
+				agents.get(0).tell(new PopulateMessage( new IntVariable( "test", "three_colors", "all" ) , agents) , null);
+				//a.tell("out", null);
+			//}
+			
+			
+			
 			
 		} catch (Exception e){
 			System.err.println(e.getMessage());
 		}
+	}
+	
+	public static class PopulateMessage{
+		public List<ActorRef> toSend;
+		public Variable value;
+		
+		public PopulateMessage( Variable v, List<ActorRef> bros ){
+			value = v;
+			toSend = bros;
+		}
+		
 	}
 	
 }
