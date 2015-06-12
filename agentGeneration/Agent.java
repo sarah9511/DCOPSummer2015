@@ -9,6 +9,8 @@ public class Agent extends UntypedActor
 {
     String name;
 	List<Variable> assignedVars;
+	int sent = 0;
+	int rec = 0;
 	
 	public Agent(int id, String n)
 	{
@@ -27,7 +29,7 @@ public class Agent extends UntypedActor
 		else if(message instanceof Variable){
 			System.err.println("Var received");
 			assignedVars.add( (Variable) message);
-			if (getSender() != null){
+			if (getSender() != ActorRef.noSender()){
 				getSender().tell("got variable: " + ((Variable)message).name, null);
 			}
 		}
@@ -39,17 +41,23 @@ public class Agent extends UntypedActor
 				}
 			} else if (((String)message).equals("getName")){
                 
-            } else if (((String)message).contains("got variable") ){
+            } else if (((String)message).contains("got variable")){
 				System.err.println( ((String)message).substring(13));
+				rec++;
+				if (rec == sent)
+				{
+					System.out.println("All done!");
+				}
 			}
 			else 
-				System.out.println(  (String)message  );
+				System.out.println(  (String)message );
 			
 		}
 		else if ( message instanceof AgentGenerator.PopulateMessage  ){
 			System.err.println("Populate Message Received" );
 			for( ActorRef a: ((AgentGenerator.PopulateMessage)message).toSend ){
 				a.tell( ((AgentGenerator.PopulateMessage)message).value, getSelf());
+				sent++;
 			}
 			
 		}

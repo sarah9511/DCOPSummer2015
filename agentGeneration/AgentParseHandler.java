@@ -72,7 +72,7 @@ public class AgentParseHandler extends DefaultHandler{
 			agentCounter++;
 			for(Variable v: varList){
                 if (  v.agentName.equals( attributes.getValue("name") )  ){
-                    agent.tell(v, null);
+                    agent.tell(v, ActorRef.noSender());
                 }
             }
             

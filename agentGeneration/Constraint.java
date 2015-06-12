@@ -12,7 +12,7 @@ public class Constraint{
       arity = -1;
       scope = null;
    }//closing constructor
-   }
+   
    public Constraint( String n, String r, int a, ArrayList<String> sc){
    
       name = n;
