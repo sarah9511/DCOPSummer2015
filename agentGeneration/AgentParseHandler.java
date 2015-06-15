@@ -6,22 +6,34 @@ import javax.xml.parsers.*;
 import java.util.*;
 import java.io.*;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
+import com.typesafe.config.ConfigFactory;
+
+
 public class AgentParseHandler extends DefaultHandler{
 	
 	public static List<Variable> varList = new ArrayList<Variable>();
 	public static List<Domain> domList = new ArrayList<Domain>();
 	public static List<Constraint> conList = new ArrayList<Constraint>();
    public static List<Relation> relationList = new ArrayList<Relation>();
+   public static List<ActorRef> agentList = new ArrayList<ActorRef>();
+   
    
 	private Variable thingy;
 	private Domain domain;
    private Constraint constraint;
    private Relation relation;
+	private ActorRef agent;
 	
-	static int tagType = -1; // 1= var 2=Domain   
+	final ActorSystem system;
+	static int tagType = -1; // 1= var 2=Domain 3 = relation 4 = agent 
+	
+	private int agentCounter = 0;
 	
 	public AgentParseHandler(){
-		
+		system = ActorSystem.create("AgentSystem", ConfigFactory.load(("agentConf")));
 	}
 	
 	public List<Variable> getVars(){
@@ -29,6 +41,10 @@ public class AgentParseHandler extends DefaultHandler{
 	}
 	public List<Domain> getDoms(){
 		return domList;
+	}
+	
+	public List<ActorRef> getAgents(){
+		return agentList;
 	}
 	
 	@Override
@@ -57,7 +73,21 @@ public class AgentParseHandler extends DefaultHandler{
 			}
 			
 		}//closing domain case
-      
+		
+		if (qName.equalsIgnoreCase("agent"))
+		{
+            //because actor vars cannot be declared directly, must use attribute.getValue("name")
+            //  so, variables must be created first in xml file first
+			tagType = 4;
+			agent = system.actorOf(Props.create(Agent.class, agentCounter, attributes.getValue("name")), "agent" + agentCounter);
+			agentCounter++;
+			for(Variable v: varList){
+                if (  v.agentName.equals( attributes.getValue("name") )  ){
+                    agent.tell(v, ActorRef.noSender());
+                }
+            }
+			//agent.tell(new Integer(agentCounter), null);
+		}
       if (qName.equalsIgnoreCase( "relation" )){
       
          tagType = 3;
@@ -86,6 +116,11 @@ public class AgentParseHandler extends DefaultHandler{
             relationList.add(relation);
             System.out.println(relation.toString());     
         }
+		
+		if (qName.equalsIgnoreCase("agent"))
+		{
+            agentList.add(agent);
+		}
 		
     }
 	
