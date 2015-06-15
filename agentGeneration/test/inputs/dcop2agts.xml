@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <instance>
 <presentation format="XCSP 2.1_FRODO" maximize="false" name="dcop2agts.xml"/>
-<agents nbAgents="2">
-	<agent name="a1"/>
-	<agent name="a2"/>
-</agents>
+
 <domains nbDomains="2">
 	<domain name="domain1" nbValues="5">-2..2</domain>
 	<domain name="domain2" nbValues="4">0..3</domain>
@@ -43,4 +40,10 @@
 	<constraint name="c_a1_4" arity="3" scope="v1_4 v1_5 v1_6" reference="cost_3"/>
 	<constraint name="c_a2_1" arity="4" scope="v2_1 v2_2 v2_3 v2_4" reference="cost_4"/>
 </constraints>
+<agents nbAgents="2">
+	<agent name="a1" />
+	<agent name="a2"/>
+</agents>
+
+
 </instance>
