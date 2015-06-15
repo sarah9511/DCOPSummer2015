@@ -17,6 +17,7 @@ public class AgentGenerator{
 	public static List<Variable> vars;
 	public static List<Domain> doms;
 	public static List<ActorRef> agents;
+	public static List<Constraint> constraints;
 	
 	public static void main(String args[]){
 		SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -30,7 +31,7 @@ public class AgentGenerator{
 			vars = handler.getVars();
 			doms = handler.getDoms();
 			agents = handler.getAgents();
-            
+            constraints = handler.getCons();
             //to be improved later
             // for (Variable v : vars){
                 // for (ActorRef a : agents){

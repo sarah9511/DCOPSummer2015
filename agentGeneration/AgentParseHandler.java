@@ -28,7 +28,7 @@ public class AgentParseHandler extends DefaultHandler{
 	private ActorRef agent;
 	
 	final ActorSystem system;
-	static int tagType = -1; // 1= var 2=Domain 3 = relation 4 = agent 
+	static int tagType = -1; // 1= var 2=Domain 3 = relation 4 = agent 5 = constraint
 	
 	private int agentCounter = 0;
 	
@@ -45,6 +45,10 @@ public class AgentParseHandler extends DefaultHandler{
 	
 	public List<ActorRef> getAgents(){
 		return agentList;
+	}
+	
+	public List<Constraint> getCons(){
+		return conList;
 	}
 	
 	@Override
@@ -98,6 +102,22 @@ public class AgentParseHandler extends DefaultHandler{
             
          }//closing if
       }//closing relation case 
+	  
+	  if(qName.equalsIgnoreCase("constraint") ){
+        String toParse = attributes.getValue("scope");
+        ArrayList<String> parsedScope = new ArrayList<String>();
+        for (int i = 0; i < Integer.parseInt( attributes.getValue("arity") ); i++   ){
+            if (toParse.indexOf(' ' ) == -1 ) break;
+            parsedScope.add( toParse.substring( 0, toParse.indexOf(' ') )  );
+            toParse = toParse.substring( toParse.indexOf(' ') + 1 );
+            
+        }  
+        parsedScope.add(toParse);
+		
+        constraint = new Constraint( attributes.getValue("name"), attributes.getValue("reference"), Integer.parseInt( attributes.getValue("arity") ), parsedScope  ); 
+        tagType = 5;
+	  }
+	  
 		
 	}
 	
@@ -120,6 +140,9 @@ public class AgentParseHandler extends DefaultHandler{
 		if (qName.equalsIgnoreCase("agent"))
 		{
             agentList.add(agent);
+		}
+		if (qName.equalsIgnoreCase("constraint")){
+			conList.add(constraint);
 		}
 		
     }
