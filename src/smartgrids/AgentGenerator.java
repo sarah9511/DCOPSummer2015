@@ -1,3 +1,5 @@
+package smartgrids;
+
 import java.util.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
@@ -12,8 +14,8 @@ import akka.actor.Props;
 import com.typesafe.config.ConfigFactory;
 
 
-public class AgentGenerator{
-	
+public class AgentGenerator
+{
 	public static List<Variable> vars;
 	public static List<Domain> doms;
 	public static List<ActorRef> agents;
@@ -47,7 +49,7 @@ public class AgentGenerator{
 				//a.tell("out", null);
 			//}
 			
-            for (Constraint c : constraints){               
+            for (Constraint c : constraints){
                 for(Relation r : relations){                //find referenced relation
                     if ( r.name.equals( c.reference )  ){
                         c.relation = r; 
@@ -85,5 +87,4 @@ public class AgentGenerator{
 		}
 		
 	}
-	
 }

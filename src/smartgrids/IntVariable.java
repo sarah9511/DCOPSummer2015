@@ -1,7 +1,9 @@
-public class IntVariable extends Variable{
-	
-	
-	int value;
+package smartgrids;
+
+
+public class IntVariable extends Variable
+{
+	private int value;
 	Domain dm;
 	
 	public IntVariable(String n, String dn, String aName ){

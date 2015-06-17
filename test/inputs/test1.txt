@@ -41,7 +41,7 @@
 	<constraint name="c_a2_1" arity="4" scope="v2_1 v2_2 v2_3 v2_4" reference="cost_4"/>
 </constraints>
 <agents nbAgents="2">
-	<agent name="a1" />
+	<agent name="a1"/>
 	<agent name="a2"/>
 </agents>
 
