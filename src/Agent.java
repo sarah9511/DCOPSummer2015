@@ -9,6 +9,7 @@ public class Agent extends UntypedActor
 {
     String name;
 	List<Variable> assignedVars;
+    List<Constraint> varCons;
 	int sent = 0;
 	int rec = 0;
 	

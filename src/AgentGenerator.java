@@ -18,6 +18,7 @@ public class AgentGenerator{
 	public static List<Domain> doms;
 	public static List<ActorRef> agents;
 	public static List<Constraint> constraints;
+    public static List<Relation> relations;
 	
 	public static void main(String args[]){
 		SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -27,25 +28,14 @@ public class AgentGenerator{
 			SAXParser sp = spf.newSAXParser();
 			AgentParseHandler handler = new AgentParseHandler();
 			System.out.println("We have arrived1.");
-			sp.parse(new File("test/inputs/test.txt"), handler  );
+			sp.parse(new File("test/inputs/dcop2agts.xml"), handler  );
 			System.out.println("We have arrived.");
 			
 			vars = handler.getVars();
 			doms = handler.getDoms();
 			agents = handler.getAgents();
             constraints = handler.getCons();
-            //to be improved later
-            // for (Variable v : vars){
-                // for (ActorRef a : agents){
-                    // if (a.name.equals(v.agentName)){
-                        // a.tell("out", null);
-                        // System.err.println("var assigned");
-                        // break;
-                    // }
-                // }
-            // }
-            
-            
+            relations = handler.getRelations();
             
 			//for(ActorRef a : agents){  //agents and domains successfully generated
 				//System.out.println(var.agentName);
@@ -53,7 +43,29 @@ public class AgentGenerator{
 				//a.tell("out", null);
 			//}
 			
+            for (Constraint c : constraints){               
+                for(Relation r : relations){                //find referenced relation
+                    if ( r.name.equals( c.reference )  ){
+                        c.relation = r; 
+                        break;
+                    }
+                }
+            }
 			
+            // TODO: Map constraints to appropriate agents by variable
+            // FIX DIS AT SOME POINT
+            // NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOPE
+            // for( Agent a : agents ){
+                // for ( Variable v : a.assignedVars ){    
+                    // for ( Constraint c : constraints ){
+                        // for
+                        
+                        
+                    // }
+                // }    
+            // }
+            
+            
 			
 			
 		} catch (Exception e){

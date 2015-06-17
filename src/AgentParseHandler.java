@@ -50,6 +50,10 @@ public class AgentParseHandler extends DefaultHandler{
 	public List<Constraint> getCons(){
 		return conList;
 	}
+    
+    public List<Relation> getRelations(){
+        return relationList;
+    }
 	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes)
@@ -114,7 +118,7 @@ public class AgentParseHandler extends DefaultHandler{
         }  
         parsedScope.add(toParse);
 		
-        constraint = new Constraint( attributes.getValue("name"), attributes.getValue("reference"), Integer.parseInt( attributes.getValue("arity") ), parsedScope  ); 
+        constraint = new Constraint( attributes.getValue("name"), attributes.getValue("reference"), Integer.parseInt( attributes.getValue("arity") ), parsedScope, attributes.getValue("scope") ); 
         tagType = 5;
 	  }
 	  
