@@ -43,7 +43,7 @@
 
 	<constraints nbConstraints="3">
 
-		<constraint name="X_and_Y_have_different_colors" arity="2" scope="X Y" reference="NEQ" />
+		<constraint name="X_and_Y_have_different_colors" arity="2" scope="X Y" reference="NEQ"  />
 
 		<constraint name="X_and_Z_have_different_colors" arity="2" scope="X Z" reference="NEQ" />
 
