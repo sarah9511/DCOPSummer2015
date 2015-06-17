@@ -26,7 +26,9 @@ public class AgentGenerator{
 			//InputStream file = new FileInputStream("test.txt");
 			SAXParser sp = spf.newSAXParser();
 			AgentParseHandler handler = new AgentParseHandler();
-			sp.parse(new File("test.txt"), handler  );
+			System.out.println("We have arrived1.");
+			sp.parse(new File("test/inputs/test.txt"), handler  );
+			System.out.println("We have arrived.");
 			
 			vars = handler.getVars();
 			doms = handler.getDoms();
@@ -56,6 +58,7 @@ public class AgentGenerator{
 			
 		} catch (Exception e){
 			System.err.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 	

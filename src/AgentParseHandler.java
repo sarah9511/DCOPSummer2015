@@ -97,7 +97,7 @@ public class AgentParseHandler extends DefaultHandler{
          tagType = 3;
          if(true){
             
-            relation = new Relation(attributes.getValue("name"), Integer.parseInt(attributes.getValue("arity"))); // constructing new relation object
+            relation = new Relation(attributes.getValue("name"), Integer.parseInt(attributes.getValue("arity")), Integer.parseInt(attributes.getValue("defaultCost")), attributes.getValue("semantics") ); // constructing new relation object
             relation.setNBTuples(Integer.parseInt(attributes.getValue("nbTuples")));
             
          }//closing if
@@ -166,7 +166,11 @@ public class AgentParseHandler extends DefaultHandler{
       
       //RELATION case
       case 3:
-         String res = toParse.replaceAll("^\\s+", "");//removing leading whitespace
+         String tupleString = new String(ch, start, length);
+         System.out.println("got here one.");
+         relation.createTuples(tupleString);
+         
+    	  /*String res = toParse.replaceAll("^\\s+", "");//removing leading whitespace
 
          res = res.substring(0, res.indexOf(":")); //trimming off the function value
          System.out.println("Function value is: " + res);
@@ -202,7 +206,9 @@ public class AgentParseHandler extends DefaultHandler{
             }//closing inner for loop
             relation.addTuple(tps);   
                
-         }//closing for loop
+         }//closing for loop*/
+    	  
+    	 
          tagType = -1;
          break;
       }//closing switch statement 
