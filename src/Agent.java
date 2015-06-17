@@ -30,7 +30,7 @@ public class Agent extends UntypedActor
 			System.err.println("Var received");
 			assignedVars.add( (Variable) message);
 			if (getSender() != ActorRef.noSender()){
-				getSender().tell("got variable: " + ((Variable)message).name, null);
+				getSender().tell("got variable: " + ((Variable) message).name, null);
 			}
 		}
 		else if (message instanceof String){

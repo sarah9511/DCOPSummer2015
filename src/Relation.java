@@ -69,12 +69,17 @@ public class Relation{
 				//if the number we are at is the last in its tuple 
 				if(k == arity -1){
 					t = t.trim();
+					
 					if(j != nbtuples -1){ // if this is not the last tuple look for a '|'
-						in = Integer.parseInt(t.substring(0, t.indexOf('|')));
+						if(t.indexOf(' ')!= -1){
+							in = Integer.parseInt(t.substring(0, t.indexOf(' ')));
+						}
+						else
+							in = Integer.parseInt(t.substring(0, t.indexOf('|')));
 						t = t.substring(t.indexOf('|') +1);
 						t = t.trim();
 					}//closing 
-					else 
+					else //this is the last tuple
 						in = Integer.parseInt(t);
 					
 					//System.out.println("Completed if 68");
@@ -85,7 +90,7 @@ public class Relation{
 				//if the number we are at is not the last one in its tuple
 				else{
 					t = t.trim();
-					//System.out.println("T in the else case :  " + t);
+					System.out.println("T in the else case :  " + t);
 					in = Integer.parseInt(t.substring(0, t.indexOf(' ')));
 					//System.out.println("Completed else 71.");
 					t = t.substring(t.indexOf(' ')+1);
@@ -104,6 +109,21 @@ public class Relation{
 		
 		
    }//closing createTuples
+   
+   public void printTuples(){
+	   
+	   for(int i = 0; i < tuples.size(); i++){
+		   
+		   System.out.println("The cost of tuple " + i + " is : " + tuples.get(i).getCost());
+		   System.out.println("The values are:");
+		   for(int j = 0; j < tuples.get(i).getInputs().size(); j++){
+			   System.out.print(" " + tuples.get(i).getInputs().get(j) + " ");
+		   }//closing inner for loop
+		   System.out.println();
+		   
+	   }//closing for loop
+	   
+   }//closing method printTuples
 }//closing class
 
 class Tuple{
@@ -117,6 +137,13 @@ class Tuple{
 	
 	}//closing default constructor
 	
+	public int getCost(){
+		return cost;
+	}
+	
+	public ArrayList<Integer> getInputs(){
+		return inputs;
+	}
 	public Tuple(int c, ArrayList<Integer> i){
 		
 		cost = c;

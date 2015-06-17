@@ -96,9 +96,12 @@ public class AgentParseHandler extends DefaultHandler{
       
          tagType = 3;
          if(true){
-            
-            relation = new Relation(attributes.getValue("name"), Integer.parseInt(attributes.getValue("arity")), Integer.parseInt(attributes.getValue("defaultCost")), attributes.getValue("semantics") ); // constructing new relation object
-            relation.setNBTuples(Integer.parseInt(attributes.getValue("nbTuples")));
+            if(attributes.getValue("defaultCost").equals("infinity")){
+            	relation = new Relation(attributes.getValue("name"), Integer.parseInt(attributes.getValue("arity")), Integer.MAX_VALUE, attributes.getValue("semantics") ); // constructing new relation object
+            	relation.setNBTuples(Integer.parseInt(attributes.getValue("nbTuples")));}
+            else{
+            	relation = new Relation(attributes.getValue("name"), Integer.parseInt(attributes.getValue("arity")), Integer.parseInt(attributes.getValue("defaultCost")), attributes.getValue("semantics") ); // constructing new relation object
+            	relation.setNBTuples(Integer.parseInt(attributes.getValue("nbTuples")));}
             
          }//closing if
       }//closing relation case 
@@ -169,6 +172,8 @@ public class AgentParseHandler extends DefaultHandler{
          String tupleString = new String(ch, start, length);
          System.out.println("got here one.");
          relation.createTuples(tupleString);
+         System.out.println("Calling printTuples.");
+         relation.printTuples();
          
     	  /*String res = toParse.replaceAll("^\\s+", "");//removing leading whitespace
 

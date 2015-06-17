@@ -27,7 +27,7 @@ public class AgentGenerator{
 			SAXParser sp = spf.newSAXParser();
 			AgentParseHandler handler = new AgentParseHandler();
 			System.out.println("We have arrived1.");
-			sp.parse(new File("test/inputs/test.txt"), handler  );
+			sp.parse(new File("test/inputs/dcop2agts.xml"), handler  );
 			System.out.println("We have arrived.");
 			
 			vars = handler.getVars();

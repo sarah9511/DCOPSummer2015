@@ -5,6 +5,7 @@ public class Constraint{
    String reference;
    int arity;
    ArrayList<String> scope;
+   Relation r;
    
    public Constraint( String n, String r, int a, ArrayList<String> sc){
    

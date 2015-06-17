@@ -20,7 +20,7 @@
 </variables>
 <relations nbRelations="4">
 	<relation arity="2" defaultCost="infinity" name="cost_1" nbTuples="11" semantics="soft">
-		0:-2 3 |0:-2 2 |0:-1 3 |0:-1 2 |0:-1 1 |0:0 3 |0:0 2 |0:0 1 |0:0 0 |0:1 0 |0:2:0
+		0:-2 3 |0:-2 2 |0:-1 3 |0:-1 2 |0:-1 1 |0:0 3 |0:0 2 |0:0 1 |0:0 0 |0:1 0 |0:2 0
 	</relation>
 	<relation arity="2" defaultCost="100" name="cost_2" nbTuples="12" semantics="soft">
 		10:-2 0 |3:-2 1 |1:-2 3 |30:-1 1 |23:-1 3 |4:0 0 |20:0 2 |3:0 3 |8:1 2 |12:1 3 |2:2 0 |1:2 3 </relation>
