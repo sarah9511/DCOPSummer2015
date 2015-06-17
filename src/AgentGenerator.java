@@ -19,6 +19,8 @@ public class AgentGenerator{
 	public static List<ActorRef> agents;
 	public static List<Constraint> constraints;
     public static List<Relation> relations;
+    public static List<AgentVariableMapper> avMap;
+    
 	
 	public static void main(String args[]){
 		SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -36,6 +38,8 @@ public class AgentGenerator{
 			agents = handler.getAgents();
             constraints = handler.getCons();
             relations = handler.getRelations();
+            avMap = handler.getMap();
+            
             
 			//for(ActorRef a : agents){  //agents and domains successfully generated
 				//System.out.println(var.agentName);
@@ -52,19 +56,16 @@ public class AgentGenerator{
                 }
             }
 			
-            // TODO: Map constraints to appropriate agents by variable
-            // FIX DIS AT SOME POINT
-            // NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOPE
-            // for( Agent a : agents ){
-                // for ( Variable v : a.assignedVars ){    
-                    // for ( Constraint c : constraints ){
-                        // for
-                        
-                        
-                    // }
-                // }    
-            // }
-            
+            for(AgentVariableMapper avm : avMap){
+                //System.err.println( "Name in mapper: " + avm.variableName);
+                for( Constraint c : constraints ){
+                    for( String target : c.scope ){
+                        if (  target.equals( avm.variableName )  ){
+                            avm.actor.tell(c, ActorRef.noSender() );
+                        }
+                    }
+                }
+            }
             
 			
 			

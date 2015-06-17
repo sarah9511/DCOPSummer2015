@@ -19,7 +19,7 @@ public class AgentParseHandler extends DefaultHandler{
 	public static List<Constraint> conList = new ArrayList<Constraint>();
    public static List<Relation> relationList = new ArrayList<Relation>();
    public static List<ActorRef> agentList = new ArrayList<ActorRef>();
-   
+   public static List<AgentVariableMapper> mapping = new ArrayList<AgentVariableMapper>();
    
 	private Variable thingy;
 	private Domain domain;
@@ -53,6 +53,10 @@ public class AgentParseHandler extends DefaultHandler{
     
     public List<Relation> getRelations(){
         return relationList;
+    }
+    
+    public List<AgentVariableMapper> getMap(){
+        return mapping;
     }
 	
 	@Override
@@ -92,6 +96,7 @@ public class AgentParseHandler extends DefaultHandler{
 			for(Variable v: varList){
                 if (  v.agentName.equals( attributes.getValue("name") )  ){
                     agent.tell(v, ActorRef.noSender());
+                    mapping.add( new AgentVariableMapper( v.name , agent ) );
                 }
             }
 			//agent.tell(new Integer(agentCounter), null);
@@ -113,14 +118,17 @@ public class AgentParseHandler extends DefaultHandler{
 	  if(qName.equalsIgnoreCase("constraint") ){
         String toParse = attributes.getValue("scope");
         ArrayList<String> parsedScope = new ArrayList<String>();
+        
         for (int i = 0; i < Integer.parseInt( attributes.getValue("arity") ); i++   ){
-            if (toParse.indexOf(' ' ) == -1 ) break;
+            if (toParse.indexOf(' ') == -1 ) break;
             parsedScope.add( toParse.substring( 0, toParse.indexOf(' ') )  );
             toParse = toParse.substring( toParse.indexOf(' ') + 1 );
             
         }  
         parsedScope.add(toParse);
 		
+        
+        
         constraint = new Constraint( attributes.getValue("name"), attributes.getValue("reference"), Integer.parseInt( attributes.getValue("arity") ), parsedScope, attributes.getValue("scope") ); 
         tagType = 5;
 	  }
@@ -230,4 +238,15 @@ public class AgentParseHandler extends DefaultHandler{
 	
 	
 
+}
+
+class AgentVariableMapper{
+    String variableName;
+    ActorRef actor;
+        
+    public AgentVariableMapper( String vn, ActorRef bob){
+        variableName = vn;
+        actor = bob;
+    }
+        
 }

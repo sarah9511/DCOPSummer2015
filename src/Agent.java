@@ -17,6 +17,7 @@ public class Agent extends UntypedActor
 	{
 		name = n;
 		assignedVars = new ArrayList<Variable>();
+        varCons = new ArrayList<Constraint>();
 	}
 
 
@@ -34,6 +35,11 @@ public class Agent extends UntypedActor
 				getSender().tell("got variable: " + ((Variable) message).name, null);
 			}
 		}
+        else if(message instanceof Constraint){
+            System.err.println("Received constraint: " + (( Constraint ) message).name + 
+            "\n in Agent: " + name  );
+            varCons.add( ((Constraint)message) );
+        }
 		else if (message instanceof String){
 			if(  ((String)message).equals("out")  ){
 				System.out.println("In agent " + name);
