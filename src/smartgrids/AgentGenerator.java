@@ -155,13 +155,10 @@ public class AgentGenerator extends DefaultHandler
 	
 	public void generateAgent()
 	{
-		final ActorSystem system = ActorSystem.create(name + "System", ConfigFactory.load(name + "conf"));
+		final ActorSystem system = ActorSystem.create(name + "System", ConfigFactory.load("config/" + name + "conf"));
 		final ActorRef agent = system.actorOf(Props.create(Agent.class, id, domains, variables, relations, constraints, neighbors), name);
 		
 		id.setActorRef(agent);
-		
-		//long lastTime = System.currentTimeMillis();
-		//while (System.currentTimeMillis() - lastTime < 5000);
 		agent.tell("identify", null);
 	}
 	 
@@ -177,8 +174,8 @@ public class AgentGenerator extends DefaultHandler
 	 		sp.parse(new File(args[0]), handler);
 	 		/*sp.parse(new File("test/inputs/agents/agent1.xml"), handler);
 	 		sp.parse(new File("test/inputs/agents/agent2.xml"), handler);
-	 		sp.parse(new File("test/inputs/agents/agent3.xml"), handler);*/
-	 		
+	 		sp.parse(new File("test/inputs/agents/agent3.xml"), handler);
+	 		*/
 	 	}
 	 	catch (Exception e)
 	 	{
