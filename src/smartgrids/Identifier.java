@@ -40,6 +40,11 @@ public class Identifier
 		return actorRef;
 	}
 	
+	public boolean refSet()
+	{
+		return refSet;
+	}
+	
 	
 	public void setActorRef(ActorRef actorRef)
 	{

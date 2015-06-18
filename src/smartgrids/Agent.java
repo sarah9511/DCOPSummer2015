@@ -1,12 +1,16 @@
 package smartgrids;
 
-import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import akka.actor.SuppressedDeadLetter;
-
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import scala.concurrent.duration.Duration;
+import smartgrids.message.InfoRequest;
+import smartgrids.message.InfoResponse;
+import akka.actor.ActorIdentity;
+import akka.actor.ActorRef;
+import akka.actor.Identify;
+import akka.actor.ReceiveTimeout;
+import akka.actor.UntypedActor;
 
 public class Agent extends UntypedActor
 {
@@ -33,6 +37,19 @@ public class Agent extends UntypedActor
 		
 		System.out.println("Agent " + id.getName() + " alive");
 	}
+	
+	private void sendIdentifyRequests()
+	{
+		for (Identifier neighbor : neighbors.values())
+		{
+			if (neighbor.refSet()) continue;
+			
+			String path = "akka.tcp://" + neighbor.getName() + "System@" + neighbor + "/user/" + neighbor.getName();
+			System.out.println(id.getName() + " is trying to connect with " + path);
+			getContext().actorSelection(path).tell(new Identify(path), getSelf());
+			//getContext().system().scheduler().scheduleOnce(Duration.create(3, SECONDS), getSelf(), ReceiveTimeout.getInstance(), getContext().dispatcher(), getSelf());
+		}
+	}
 
 
 	@Override
@@ -41,6 +58,35 @@ public class Agent extends UntypedActor
 		if (message instanceof String)
 		{
 			System.out.println("Agent " + id.getName() + " received " + (String)message);
+			if (((String)message).equals("identify"))
+			{
+				long lastTime = System.currentTimeMillis();
+				while (System.currentTimeMillis() - lastTime < 2000);
+				sendIdentifyRequests();
+			}
+		}
+		else if (message instanceof ActorIdentity)
+		{
+			ActorRef responder = ((ActorIdentity)message).getRef();
+			
+			if (responder != null)
+			{
+				System.out.println(id.getName() + " received actor identity");
+				getContext().watch(responder);
+				responder.tell(new InfoRequest(), getSelf());
+			}
+		}
+		else if (message instanceof InfoRequest)
+		{
+			System.out.println(id.getName() + " received info request");
+			getSender().tell(new InfoResponse(id.getName()), getSelf());
+		}
+		else if (message instanceof InfoResponse)
+		{
+			String name = ((InfoResponse)message).name;
+			neighbors.get(name).setActorRef(getSender());
+			
+			System.out.println(id.getName() + " received a response from " + name + "!");
 		}
 		else
 		{

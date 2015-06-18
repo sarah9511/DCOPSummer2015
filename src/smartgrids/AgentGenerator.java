@@ -1,90 +1,189 @@
 package smartgrids;
 
-import java.util.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import java.io.File;
+import java.util.HashMap;
 
-import javax.xml.parsers.*;
-import java.util.*;
-import java.io.*;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+
 import com.typesafe.config.ConfigFactory;
 
 
-public class AgentGenerator
+public class AgentGenerator extends DefaultHandler
 {
-	public static List<Variable> vars;
-	public static List<Domain> doms;
-	public static List<ActorRef> agents;
-	public static List<Constraint> constraints;
-    public static List<Relation> relations;
-    public static List<AgentVariableMapper> avMap;
-    
+	private String name;
+	private String ip;
+	private int port;
 	
-	public static void main(String args[]){
-		SAXParserFactory spf = SAXParserFactory.newInstance();
+	private Identifier id;
 	
-		try{
-			//InputStream file = new FileInputStream("test.txt");
-			SAXParser sp = spf.newSAXParser();
-			AgentParseHandler handler = new AgentParseHandler();
-			System.out.println("We have arrived1.");
-			sp.parse(new File("test/inputs/dcop2agts.xml"), handler  );
-			System.out.println("We have arrived.");
+	private HashMap<String, Domain> domains = new HashMap<>();
+	private HashMap<String, Variable> variables = new HashMap<>();
+	private HashMap<String, Relation> relations = new HashMap<>();
+	private HashMap<String, Constraint> constraints = new HashMap<>();
+	
+	private HashMap<String, Identifier> neighbors = new HashMap<>();
+	
+	
+	private Domain curDomain;
+	private Relation curRelation;
+	
+	
+	@Override
+	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
+	{
+		if (qName.equals("id"))
+		{
+			name = attributes.getValue("name");
+			ip = attributes.getValue("ip");
+			port = Integer.parseInt(attributes.getValue("port"));
 			
-			vars = handler.getVars();
-			doms = handler.getDoms();
-			agents = handler.getAgents();
-            constraints = handler.getCons();
-            relations = handler.getRelations();
-            avMap = handler.getMap();
-            
-            
-			//for(ActorRef a : agents){  //agents and domains successfully generated
-				//System.out.println(var.agentName);
-				agents.get(0).tell(new PopulateMessage( new IntVariable( "test", "three_colors", "all" ) , agents) , null);
-				//a.tell("out", null);
-			//}
+			id = new Identifier(name, ip, port);
+		}
+		else if (qName.equals("domain"))
+		{
+			String name = attributes.getValue("name");
+			String type = attributes.getValue("datatype");
 			
-            for (Constraint c : constraints){
-                for(Relation r : relations){                //find referenced relation
-                    if ( r.name.equals( c.reference )  ){
-                        c.relation = r; 
-                        break;
-                    }
-                }
-            }
+			if (type.equals("int"))
+			{
+				curDomain = new Domain<Integer>(name, type);
+			}
+		}
+		else if (qName.equals("variable"))
+		{
+			String name = attributes.getValue("name");
+			String type = attributes.getValue("datatype");
+			String domainName = attributes.getValue("domain");
 			
-            for(AgentVariableMapper avm : avMap){
-                //System.err.println( "Name in mapper: " + avm.variableName);
-                for( Constraint c : constraints ){
-                    for( String target : c.scope ){
-                        if (  target.equals( avm.variableName )  ){
-                            avm.actor.tell(c, ActorRef.noSender() );
-                        }
-                    }
-                }
-            }
-            
+			if (type.equals("int"))
+			{
+				Domain<Integer> domain = domains.get(domainName);
+				variables.put(name, new Variable<Integer>(name, type, domain));
+			}
+		}
+		else if (qName.equals("relation"))
+		{
+			String name = attributes.getValue("name");
+			int arity = Integer.parseInt(attributes.getValue("arity"));
 			
+			String defaultCostString = attributes.getValue("defaultCost");
+			int defaultCost;
+			if (defaultCostString.equals("infinity"))
+			{
+				defaultCost = Integer.MAX_VALUE;
+			}
+			else
+			{
+				defaultCost = Integer.parseInt(defaultCostString);
+			}
 			
-		} catch (Exception e){
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			String semantics = attributes.getValue("semantics");
+			
+			curRelation = new Relation(name, arity, defaultCost, semantics);
+		}
+		else if (qName.equals("constraint"))
+		{
+			String name = attributes.getValue("name");
+			int arity = Integer.parseInt(attributes.getValue("arity"));
+			String scope = attributes.getValue("scope");
+			String reference = attributes.getValue("reference");
+			
+			Relation relation = relations.get(reference);
+			
+			constraints.put(name, new Constraint(name, arity, scope, relation));
+		}
+		else if (qName.equals("neighbor"))
+		{
+			String name = attributes.getValue("name");
+			String ip = attributes.getValue("ip");
+			int port = Integer.parseInt(attributes.getValue("port"));
+			
+			neighbors.put(name, new Identifier(name, ip, port));
 		}
 	}
 	
-	public static class PopulateMessage{
-		public List<ActorRef> toSend;
-		public Variable value;
+	@Override
+	public void characters(char ch[], int start, int length) throws SAXException
+	{
+		String toParse = new String(ch, start, length);
 		
-		public PopulateMessage( Variable v, List<ActorRef> bros ){
-			value = v;
-			toSend = bros;
+		if (curDomain != null)
+		{
+			int delIndex = toParse.indexOf("..");
+			int min = Integer.parseInt(toParse.substring(0, delIndex));
+			int max = Integer.parseInt(toParse.substring(delIndex + 2));
+			
+			for (int i = min; i <= max; i++)
+			{
+				curDomain.addValue(i);
+			}
 		}
+		else if (curRelation != null)
+		{
+			curRelation.createTuples(toParse);
+		}
+	}
+	
+	@Override
+	public void endElement(String uri, String localName, String qName) throws SAXException
+	{
+		if (qName.equals("domain"))
+		{
+			domains.put(curDomain.getName(), curDomain);
+			curDomain = null;
+		}
+		else if (qName.equals("relation"))
+		{
+			relations.put(curRelation.getName(), curRelation);
+			curRelation = null;
+		}
+		else if (qName.equals("instance"))
+		{
+			generateAgent();
+		}
+    }
+	
+	
+	public void generateAgent()
+	{
+		final ActorSystem system = ActorSystem.create(name + "System", ConfigFactory.load(name + "conf"));
+		final ActorRef agent = system.actorOf(Props.create(Agent.class, id, domains, variables, relations, constraints, neighbors), name);
 		
+		id.setActorRef(agent);
+		
+		//long lastTime = System.currentTimeMillis();
+		//while (System.currentTimeMillis() - lastTime < 5000);
+		agent.tell("identify", null);
+	}
+	 
+	 
+	public static void main(String[] args)
+	{
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		
+	 	try
+	 	{
+	 		SAXParser sp = spf.newSAXParser();
+	 		AgentGenerator handler = new AgentGenerator();
+	 		sp.parse(new File(args[0]), handler);
+	 		/*sp.parse(new File("test/inputs/agents/agent1.xml"), handler);
+	 		sp.parse(new File("test/inputs/agents/agent2.xml"), handler);
+	 		sp.parse(new File("test/inputs/agents/agent3.xml"), handler);*/
+	 		
+	 	}
+	 	catch (Exception e)
+	 	{
+	 		System.err.println(e.getMessage());
+	 		e.printStackTrace();
+	 	}
 	}
 }
