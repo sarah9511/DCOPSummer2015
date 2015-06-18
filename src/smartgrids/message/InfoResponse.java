@@ -2,6 +2,7 @@ package smartgrids.message;
 
 import java.io.Serializable;
 
+
 public class InfoResponse implements Serializable
 {
 	public String name;
