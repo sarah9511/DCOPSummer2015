@@ -146,9 +146,9 @@ public class AgentGenerator extends DefaultHandler
 			relations.put(curRelation.getName(), curRelation);
 			curRelation = null;
 		}
-		else if (qName.equals("instance"))
+		else if (qName.equals("agent"))
 		{
-			generateAgent();
+			//generateAgent();
 		}
     }
 	
