@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <agent>
-	<id name="agt2" ip="127.0.0.1" port="2553" />
+	<id name="agt3" ip="127.0.0.1" port="2554" />
 	
-	<domains nbDomains="3">
-		<domain name="dom1" nbValues="4" datatype="int">0..3</domain>
-		<domain name="dom2" nbValues="10" datatype="int">1..10</domain>
-		<domain name="dom3" nbValues="5" datatype="int">-5..-1</domain>
+	<domains nbDomains="2">
+		<domain name="dom1" nbValues="7" datatype="int">-2..4</domain>
+		<domain name="dom2" nbValues="2" datatype="int">1..2</domain>
 	</domains>
 	
-	<variables nbVariables="3">
+	<variables nbVariables="4">
 		<variable name="var1" domain="dom1" datatype="int" />
-		<variable name="var2" domain="dom2" datatype="int" />
-		<variable name="var3" domain="dom3" datatype="int" />
+		<variable name="var2" domain="dom1" datatype="int" />
+		<variable name="var3" domain="dom2" datatype="int" />
+		<variable name="var4" domain="dom2" datatype="int" />
 	</variables>
 
 	<relations nbRelations="4">
@@ -31,9 +31,11 @@
 	</relations>
 
 	<constraints nbConstraints="4">
-		<constraint name="con1" arity="2" scope="agt1:var1 var1" reference="rel1"/>
-		<constraint name="con2" arity="2" scope="agt1:var2 var3" reference="rel2"/>
-		<constraint name="con3" arity="3" scope="var2 agt3:var1 agt3:var2" reference="rel3"/>
-		<constraint name="con4" arity="4" scope="var2 var3 agt3:var1 agt3:var3" reference="rel4"/>
+		<constraint name="con3" arity="3" scope="agt2:var2 var1 var2" reference="rel3"/>
+		<constraint name="con4" arity="4" scope="agt2:var2 agt2:var3 var1 var3" reference="rel4"/>
 	</constraints>
+
+	<neighbors nbNeighbors="1">
+		<neighbor name="agt2" ip="127.0.0.1" port="2553" />
+	</neighbors>
 </agent>
