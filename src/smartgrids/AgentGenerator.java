@@ -61,14 +61,15 @@ public class AgentGenerator extends DefaultHandler
 		else if (qName.equals("variable"))
 		{
 			String name = attributes.getValue("name");
-			String type = attributes.getValue("datatype");
 			String domainName = attributes.getValue("domain");
+			
+			String type = domains.get(domainName).getType();
 			
 			if (type.equals("int"))
 			{
 				Domain<Integer> domain = domains.get(domainName);
 				variables.put(name, new Variable<Integer>(name, type, domain));
-				id.getAgentVars().add(new Variable<Integer>(name, type, domain)  );
+				//id.getAgentVars().add(new Variable<Integer>(name, type, domain));
 			}
 		}
 		else if (qName.equals("relation"))
@@ -137,13 +138,7 @@ public class AgentGenerator extends DefaultHandler
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException
 	{
-		
-		if (qName.equals("id")){
-			for ( Variable v : id.getAgentVars() ){
-				System.err.println(" Var assigned to " + id.getName() + " : " + v.getName() );
-			}
-		}
-		else if (qName.equals("domain"))
+		if (qName.equals("domain"))
 		{
 			domains.put(curDomain.getName(), curDomain);
 			curDomain = null;

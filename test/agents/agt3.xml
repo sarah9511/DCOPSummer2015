@@ -9,10 +9,10 @@
 	</domains>
 	
 	<variables nbVariables="4">
-		<variable name="var1" domain="dom1" datatype="int" />
-		<variable name="var2" domain="dom1" datatype="int" />
-		<variable name="var3" domain="dom2" datatype="int" />
-		<variable name="var4" domain="dom2" datatype="int" />
+		<variable name="var1" domain="dom1" />
+		<variable name="var2" domain="dom1" />
+		<variable name="var3" domain="dom2" />
+		<variable name="var4" domain="dom2" />
 	</variables>
 
 	<relations nbRelations="4">

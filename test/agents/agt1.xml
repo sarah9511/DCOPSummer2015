@@ -8,8 +8,8 @@
 	</domains>
 	
 	<variables nbVariables="2">
-		<variable name="var1" domain="dom1" datatype="int" />
-		<variable name="var2" domain="dom1" datatype="int" />
+		<variable name="var1" domain="dom1" />
+		<variable name="var2" domain="dom1" />
 	</variables>
 
 	<relations nbRelations="4">
