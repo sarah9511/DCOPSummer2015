@@ -18,5 +18,14 @@ public class Variable<T>
 		this.type = type;
 		
 		this.domain = domain;
+		
+		this.value =  this.domain.getValues().get( (int)Math.random() * (this.domain.getValues().size() - 1) );
+		
 	}
+	
+	
+	public String getName(){
+		return name;
+	}
+	
 }

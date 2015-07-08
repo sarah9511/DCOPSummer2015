@@ -6,13 +6,14 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import scala.concurrent.duration.Duration;
 import smartgrids.message.InfoRequest;
 import smartgrids.message.InfoResponse;
+import smartgrids.message.ValueReport;
 import akka.actor.ActorIdentity;
 import akka.actor.ActorRef;
 import akka.actor.Identify;
 import akka.actor.ReceiveTimeout;
 import akka.actor.UntypedActor;
 
-public class Agent extends UntypedActor
+public class Agent extends UntypedActor 
 {
     private Identifier id;
 	
@@ -23,9 +24,13 @@ public class Agent extends UntypedActor
 	
 	private HashMap<String, Identifier> neighbors = new HashMap<>();
 	
+	private boolean valChanged;
+	
 	
 	public Agent(Identifier id, HashMap<String, Domain> domains, HashMap<String, Variable> variables, HashMap<String, Relation> relations, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors)
 	{
+		System.out.println("Agent " + id.getName() + " alive");
+
 		this.id = id;
 		
 		this.domains = domains;
@@ -35,7 +40,18 @@ public class Agent extends UntypedActor
 		
 		this.neighbors = neighbors;
 		
+		this.valChanged = true;
+		
+		//Thread.sleep(2000);
+		
 		System.out.println("Agent " + id.getName() + " alive");
+		System.err.println("Associated Variables: ");
+		for( Variable v : this.id.getAgentVars() ){
+			System.out.print( v.getName() + "\t" );
+		}
+		System.out.println();
+		//run();
+		
 	}
 	
 	private void sendIdentifyRequests()
@@ -93,4 +109,7 @@ public class Agent extends UntypedActor
 			unhandled(message);
 		}
 	}
+	
+	
+	
 }

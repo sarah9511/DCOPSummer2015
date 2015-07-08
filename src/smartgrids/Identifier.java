@@ -1,6 +1,8 @@
 package smartgrids;
 
 import akka.actor.ActorRef;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Identifier
 {
@@ -10,13 +12,14 @@ public class Identifier
 	
 	private ActorRef actorRef;
 	private boolean refSet = false;
-	
+	private List<Variable> agentVars;
 	
 	public Identifier(String name, String ip, int port)
 	{
 		this.name = name;
 		this.ip = ip;
 		this.port = port;
+		this.agentVars = new ArrayList<Variable>();
 	}
 	
 	
@@ -38,6 +41,10 @@ public class Identifier
 	public ActorRef getActorRef()
 	{
 		return actorRef;
+	}
+	
+	public List<Variable> getAgentVars(){
+		return agentVars;
 	}
 	
 	public boolean refSet()

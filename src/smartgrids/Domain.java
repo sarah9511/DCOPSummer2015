@@ -31,6 +31,9 @@ public class Domain<T>
 		return type;
 	}
 	
+	public ArrayList<T> getValues(){
+		return values;
+	}
 	
 	public void printValues()
 	{
