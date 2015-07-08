@@ -148,7 +148,7 @@ public class AgentGenerator extends DefaultHandler
 		}
 		else if (qName.equals("agent"))
 		{
-			//generateAgent();
+			generateAgent();
 		}
     }
 	

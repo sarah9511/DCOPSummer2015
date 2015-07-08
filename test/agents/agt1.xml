@@ -30,7 +30,9 @@
 	<constraints nbConstraints="4">
 		<constraint name="con1" arity="2" scope="var1 agt2:var1" reference="rel1"/>
 		<constraint name="con2" arity="2" scope="var2 agt2:var3" reference="rel2"/>
-		<constraint name="con3" arity="3" scope="agt2:var2 agt3:var1 agt3:var2" reference="rel3"/>
-		<constraint name="con4" arity="4" scope="agt2:var2 agt2:var3 agt3:var1 agt3:var3" reference="rel4"/>
 	</constraints>
+
+	<neighbors nbNeighbors="1">
+		<neighbor name="agt2" ip="127.0.0.1" port="2553" />
+	</neighbors>
 </agent>

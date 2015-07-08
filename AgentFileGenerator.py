@@ -1,4 +1,4 @@
-with open("test/agents/agents.xml", "r") as agentsFile:
+with open("agents.xml", "r") as agentsFile:
 	data = agentsFile.read()
 
 dataLines = data.split('\n')
@@ -11,7 +11,7 @@ inRelations = False
 relations = ""
 
 inConstraints = False
-constraints = ""
+constraints = []
 
 for line in dataLines:
 	if line == "<agent>":
@@ -35,20 +35,36 @@ for line in dataLines:
 	if line.startswith("<constraints"):
 		inConstraints = True
 	if inConstraints:
-		constraints += '\t' + line + '\n'
+		constraints.append('\t' + line + '\n')
 	if line == "</constraints>":
 		inConstraints = False
 
-
 for agent in agentFileStrings:
-	agent[1] += '\n' + relations
-	agent[1] += '\n' + constraints.replace(agent[0] + ":", '')
+	agent[1] += '\n' + relations + '\n'
+
+	agentConstraints = ""
+	for line in constraints:
+		if "<constraints" in line or "</constraints>" in line or agent[0] + ':' in line:
+			agentConstraints += line.replace(agent[0] + ':', '')
+	
+	agent[1] += agentConstraints + '\n'
+
+	neighborCount = 0
+	neighbors = ""
+
+	for agent2 in agentFileStrings:
+		if agent2[0] + ':' in agentConstraints:
+			neighborCount += 1
+			idI = agent2[1].find("<id name=")
+			neighbors += "\t\t<neighbor " + agent2[1][idI + 4:agent2[1].find("/>", idI) + 2] + '\n'
+
+	agent[1] += "\t<neighbors nbNeighbors=\"" + str(neighborCount) + "\">\n" + neighbors + "\t</neighbors>\n"
+
 	agent[1] += "</agent>\n"
 
-	agentFile = open(agent[0] + ".xml", "w")
+	agentFile = open("test/agents/" + agent[0] + ".xml", "w")
 	agentFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n\n" + agent[1])
 	agentFile.close()
-
 
 for agent in agentFileStrings:
 	print agent[0]
