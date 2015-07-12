@@ -43,6 +43,8 @@ public class Agent extends UntypedActor
 		System.err.println("Variables:");
 		for (Variable v : variables.values())
 		{
+			v.owner = id;
+			
 			System.err.print("    " + v.getName() + ": " + v.getValue() + ", " + v.getDomain().getName() + ": ");
 			for (Object value : v.getDomain().getValues())
 			{
@@ -63,7 +65,6 @@ public class Agent extends UntypedActor
 			String path = "akka.tcp://" + neighbor.getName() + "System@" + neighbor + "/user/" + neighbor.getName();
 			System.out.println(id.getName() + " is trying to connect with " + path);
 			getContext().actorSelection(path).tell(new Identify(path), getSelf());
-			//getContext().system().scheduler().scheduleOnce(Duration.create(3, SECONDS), getSelf(), ReceiveTimeout.getInstance(), getContext().dispatcher(), getSelf());
 		}
 	}
 
@@ -88,7 +89,7 @@ public class Agent extends UntypedActor
 			if (responder != null)
 			{
 				System.out.println(id.getName() + " received actor identity");
-				getContext().watch(responder);
+				//getContext().watch(responder);
 				responder.tell(new InfoRequest(), getSelf());
 			}
 		}
@@ -103,6 +104,29 @@ public class Agent extends UntypedActor
 			neighbors.get(name).setActorRef(getSender());
 			
 			System.out.println(id.getName() + " received a response from " + name + "!");
+			
+			boolean filledOut = true;
+			
+			// check if neighbors filled out
+			for (Identifier id : neighbors.values())
+			{
+				if (!id.refSet())
+				{
+					filledOut = false;
+					break;
+				}
+			}
+			
+			if (filledOut)
+			{
+				for (Constraint constraint : constraints.values())
+				{
+					constraint.setupVars(id, variables, neighbors);
+				}
+				
+				// send vars
+				
+			}
 		}
 		else
 		{

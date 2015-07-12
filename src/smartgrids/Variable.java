@@ -22,6 +22,12 @@ public class Variable<T>
 		value =  this.domain.getValues().get((int)(Math.random() * this.domain.getValues().size()));
 	}
 	
+	public Variable(String name, Identifier owner)
+	{
+		this.name = name;
+		this.owner = owner;
+	}
+	
 	
 	public String getName()
 	{
