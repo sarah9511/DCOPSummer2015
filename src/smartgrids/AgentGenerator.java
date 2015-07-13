@@ -175,9 +175,9 @@ public class AgentGenerator extends DefaultHandler
 	 		AgentGenerator handler = new AgentGenerator();
 	 		sp.parse(new File(args[0]), handler);
 	 		
-	 		/*sp.parse(new File("test/inputs/agents/agt1.xml"), handler);
-	 		sp.parse(new File("test/inputs/agents/agt2.xml"), handler);
-	 		sp.parse(new File("test/inputs/agents/agt3.xml"), handler);
+	 		/*sp.parse(new File("test/inputs/agents/agent1.xml"), handler);
+	 		sp.parse(new File("test/inputs/agents/agent2.xml"), handler);
+	 		sp.parse(new File("test/inputs/agents/agent3.xml"), handler);
 	 		*/
 	 	}
 	 	catch (Exception e)
