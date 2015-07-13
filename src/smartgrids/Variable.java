@@ -2,6 +2,7 @@ package smartgrids;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class Variable<T> implements Serializable
 {
 	private String name;
@@ -19,20 +20,16 @@ public class Variable<T> implements Serializable
 	{
 		this.name = name;
 		this.type = type;
-		
 		this.domain = domain;
 		
-		value =  this.domain.getValues().get((int)(Math.random() * this.domain.getValues().size()));
-		this.valChanged = true;
+		value = domain.getValues().get((int)(Math.random() * domain.getValues().size()));
+		valChanged = true;
 	}
 	
 	public Variable(String name, Identifier owner)
 	{
 		this.name = name;
 		this.owner = owner;
-		// value =  this.domain.getValues().get((int)(Math.random() * this.domain.getValues().size()));
-		// this.valChanged = true;
-		
 	}
 	
 	
@@ -56,17 +53,19 @@ public class Variable<T> implements Serializable
 		return value;
 	}
 	
-	public boolean getValChanged(){
-		return this.valChanged;
+	public boolean valChanged()
+	{
+		return valChanged;
 	}
 	
-	public void setVal(T val){
-		this.value = val; 
-		this.valChanged = true;
+	public void setVal(T value)
+	{
+		this.value = value; 
+		valChanged = true;
 	}
 	
-	public void reset(){
-		this.valChanged = false;
+	public void reset()
+	{
+		valChanged = false;
 	}
-	
 }

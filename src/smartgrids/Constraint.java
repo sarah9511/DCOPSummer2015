@@ -10,8 +10,8 @@ public class Constraint
 	private String[] variables;
 	private Relation relation;
 	
-	private HashMap<String, Variable> ourVars = new HashMap<>();
-	private HashMap<String, Variable> theirVars = new HashMap<>();
+	private HashMap<String, Variable<?>> ourVars = new HashMap<>();
+	private HashMap<String, Variable<?>> theirVars = new HashMap<>();
 	
 	
 	public Constraint(String name, int arity, String scope, Relation relation)
@@ -24,49 +24,50 @@ public class Constraint
 	}
 	
 	
-	public void setupVars(Identifier thisAgt, HashMap<String, Variable> ourVariables, HashMap<String, Identifier> neighbors)
+	public void setupVars(Identifier thisAgt, HashMap<String, Variable<?>> ourVariables, HashMap<String, Identifier> neighbors)
 	{
-		/*for (int i = 0; i < variables.length; i++)
-		{
-			System.out.print(variables[i] + " ");
-		}
-		System.out.println();*/
-		
-		for (int i = 0; i < variables.length; i++)//for each string in this constraint's variable list
+		//for each string in this constraint's variable list
+		for (int i = 0; i < variables.length; i++)
 		{
 			String[] stringVar = variables[i].split(":");
 			
 			//if the variable belongs to this agent 
 			if (stringVar.length == 1)
 			{
-				String var = stringVar[0];
-				
-				ourVars.put(var, ourVariables.get(var));
-				
-				//System.out.println("Our var: " + thisAgt.getName() + " " + var);
+				String varName = stringVar[0];
+				ourVars.put(varName, ourVariables.get(varName));
 			}
-			
 			//the agent belongs to someone else 
 			else
 			{
-				System.err.println("in else case");
 				String agtName = stringVar[0];
-				String var = stringVar[1];
+				String varName = stringVar[1];
 				
-				System.err.println("agtName: " + agtName);//
-				System.err.println("var: " + var);
-				
-				
-				if (neighbors.get( agtName )  == null ) return;
-				theirVars.put(var, new Variable(var, neighbors.get(agtName)));//ERROR : cannot currently get the agtName
-				
-				//System.out.println("Their var: " + agtName + " " + var);
+				if (neighbors.get(agtName) == null) return;
+				theirVars.put(variables[i], new Variable(varName, neighbors.get(agtName)));
 			}
 		}
 	}
 	
-	public HashMap<String, Variable> getTheirVars(){
-		return this.theirVars;
+	
+	public String getName()
+	{
+		return name;
+	}
+	
+	public int getArity()
+	{
+		return arity;
+	}
+	
+	public HashMap<String, Variable<?>> getOurVars()
+	{
+		return ourVars;
+	}
+	
+	public HashMap<String, Variable<?>> getTheirVars()
+	{
+		return theirVars;
 	}
 	
 	

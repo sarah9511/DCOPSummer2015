@@ -3,6 +3,7 @@ package smartgrids;
 import java.util.ArrayList;
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class Domain<T> implements Serializable
 {
 	private String name;
@@ -10,11 +11,13 @@ public class Domain<T> implements Serializable
 	
 	private ArrayList<T> values = new ArrayList<>();
 	
+	
 	public Domain(String name, String type)
 	{
 		this.name = name;
 		this.type = type;
 	}
+	
 	
 	public void addValue(T value)
 	{

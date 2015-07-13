@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class Identifier implements Serializable
 {
 	private String name;
