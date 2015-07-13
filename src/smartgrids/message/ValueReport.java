@@ -1,9 +1,12 @@
 package smartgrids.message;
 
+import java.io.Serializable;
+
 import smartgrids.Variable;
 import akka.actor.ActorRef;
 
-public class ValueReport
+
+public class ValueReport implements Serializable
 {
 	public String name;
 	public ActorRef sender;

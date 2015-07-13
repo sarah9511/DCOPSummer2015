@@ -32,10 +32,11 @@ public class Constraint
 		}
 		System.out.println();*/
 		
-		for (int i = 0; i < variables.length; i++)
+		for (int i = 0; i < variables.length; i++)//for each string in this constraint's variable list
 		{
 			String[] stringVar = variables[i].split(":");
 			
+			//if the variable belongs to this agent 
 			if (stringVar.length == 1)
 			{
 				String var = stringVar[0];
@@ -44,16 +45,28 @@ public class Constraint
 				
 				//System.out.println("Our var: " + thisAgt.getName() + " " + var);
 			}
+			
+			//the agent belongs to someone else 
 			else
 			{
+				System.err.println("in else case");
 				String agtName = stringVar[0];
 				String var = stringVar[1];
 				
-				theirVars.put(var, new Variable(var, neighbors.get(agtName)));
+				System.err.println("agtName: " + agtName);//
+				System.err.println("var: " + var);
+				
+				
+				if (neighbors.get( agtName )  == null ) return;
+				theirVars.put(var, new Variable(var, neighbors.get(agtName)));//ERROR : cannot currently get the agtName
 				
 				//System.out.println("Their var: " + agtName + " " + var);
 			}
 		}
+	}
+	
+	public HashMap<String, Variable> getTheirVars(){
+		return this.theirVars;
 	}
 	
 	

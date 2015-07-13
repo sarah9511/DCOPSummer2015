@@ -1,8 +1,9 @@
 package smartgrids;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Domain<T>
+public class Domain<T> implements Serializable
 {
 	private String name;
 	private String type;

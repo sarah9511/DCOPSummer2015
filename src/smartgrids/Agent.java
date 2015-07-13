@@ -1,9 +1,13 @@
 package smartgrids;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+
 
 import smartgrids.message.InfoRequest;
 import smartgrids.message.InfoResponse;
+import smartgrids.message.ValueReport;
 import akka.actor.ActorIdentity;
 import akka.actor.ActorRef;
 import akka.actor.Identify;
@@ -117,8 +121,15 @@ public class Agent extends UntypedActor
 				}
 			}
 			
+			
 			if (filledOut)
 			{
+				List<ActorRef> sendTo = new ArrayList<ActorRef>();
+				
+				for( String n : neighbors.keySet() ){
+					System.err.println("in InfoResponse loop: " + n);
+				}
+				
 				for (Constraint constraint : constraints.values())
 				{
 					constraint.setupVars(id, variables, neighbors);
@@ -126,7 +137,55 @@ public class Agent extends UntypedActor
 				
 				// send vars
 				
+				// check if each variable needs to be changed
+				// redundant in this step, just here for reference for now
+				
+				for(Variable v : variables.values()){
+					//TODO: change to get list of apt neighbors through constraints
+					//      send a new ValueReport to the apt neighbors
+					//		reset v.valChanged
+					
+					
+					
+					if (v.getValChanged()){
+						// may change in future to use owner property of variable and narrow by going through constraints?
+						for (Identifier n: neighbors.values()  ){
+						
+							n.getActorRef().tell( (new ValueReport( id.getName(), getSelf(), v )) , getSelf() );
+						
+						}
+						v.reset();
+						
+					}	
+					
+				}
+				
 			}
+		}
+		else  if (message instanceof ValueReport)
+		{
+			ValueReport vr = (ValueReport) message;
+			System.out.println("received a value report from: " + vr.name );
+			
+			
+			for (Constraint c : constraints.values()){
+				System.err.println("going through constraints");
+				Variable theirVar = c.getTheirVars().get( vr.var.getName() );
+				
+				if ( theirVar == null ){
+					 continue;
+				}
+				System.err.println("Value before update: " + theirVar.getValue());
+				
+				
+				c.getTheirVars().put( vr.var.getName() , vr.var ); //overwrite previous value
+				System.err.println("Value after update: " + c.getTheirVars().get( vr.var.getName() ).getValue());
+				
+				
+				
+			}
+			
+			
 		}
 		else
 		{

@@ -2,7 +2,9 @@ package smartgrids;
 
 import akka.actor.ActorRef;
 
-public class Identifier
+import java.io.Serializable;
+
+public class Identifier implements Serializable
 {
 	private String name;
 	private String ip;
