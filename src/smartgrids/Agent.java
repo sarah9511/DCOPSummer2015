@@ -44,7 +44,7 @@ public class Agent extends UntypedActor
 		System.err.println("Variables:");
 		for (Variable<?> v : variables.values())
 		{
-			v.owner = id;
+			v.setOwner(id);
 			
 			System.err.print("    " + v.getName() + ": " + v.getValue() + ", " + v.getDomain().getName() + ": ");
 			for (Object value : v.getDomain().getValues())
@@ -119,36 +119,41 @@ public class Agent extends UntypedActor
 			
 			if (filledOut)
 			{
+				// set up actual variable objects in constraint
 				for (Constraint constraint : constraints.values())
 				{
-					// set up actual variable objects in constraint
 					constraint.setupVars(id, variables, neighbors);
-					
-					// initial value report
+				}
+				
+				// wait 2 seconds to make sure all agents' constraints are set up
+				long lastTime = System.currentTimeMillis();
+				while (System.currentTimeMillis() - lastTime < 2000);
+				
+				ArrayList<String> sentVars = new ArrayList<>();
+				
+				// initial value report
+				for (Constraint constraint : constraints.values())
+				{
 					Collection<Variable<?>> ourVars = constraint.getOurVars().values();
 					Collection<Variable<?>> theirVars = constraint.getTheirVars().values();
 					
-					ArrayList<String> sentAgents = new ArrayList<>();
-					
 					for (Variable<?> theirVar : theirVars)
 					{
-						String ownerName = theirVar.owner.getName();
+						String ownerName = theirVar.getOwner().getName();
 						
-						if (!sentAgents.contains(ownerName))
+						ActorRef ownerRef = theirVar.getOwner().getActorRef();
+						
+						for (Variable<?> ourVar : ourVars)
 						{
-							ActorRef ownerRef = theirVar.owner.getActorRef();
-							
-							for (Variable<?> ourVar : ourVars)
+							//if (ourVar.valChanged())
+							if (!sentVars.contains(ourVar.getName() + ":" + theirVar.getOwner().getName()))
 							{
-								if (ourVar.valChanged())
-								{
-									System.err.println("sending " + ourVar.getName() + " to " + ownerName);
-									ownerRef.tell(new ValueReport(id.getName(), ourVar), getSelf());
-									ourVar.reset();
-								}
+								System.err.println("sending " + ourVar.getName() + " to " + ownerName);
+								ownerRef.tell(new ValueReport(id.getName(), ourVar), getSelf());
+								ourVar.reset();
+								
+								sentVars.add(ourVar.getName() + ":" + theirVar.getOwner().getName());
 							}
-							
-							sentAgents.add(ownerName);
 						}
 					}
 				}
@@ -156,19 +161,60 @@ public class Agent extends UntypedActor
 		}
 		else  if (message instanceof ValueReport)
 		{
-			ValueReport vr = (ValueReport) message;
-			System.out.println("received a value report from: " + vr.name);
+			ValueReport vr = (ValueReport)message;
+			String varKey = vr.name + ":" + vr.var.getName();
+			
+			System.out.println("received a value report from " + vr.name + " - " + vr.var.getName());
 			
 			for (Constraint c : constraints.values())
 			{
-				Variable<?> theirVar = c.getTheirVars().get(vr.name + ":" + vr.var.getName());
+				Variable<?> theirVar = c.getTheirVars().get(varKey);
 				
-				if (theirVar == null) continue;
+				if (theirVar == null || theirVar.set)
+				{
+					continue;
+				}
 				
-				System.err.print(c.getName() + "  " + vr.name + ":" + vr.var.getName() + "  " + theirVar.getValue() + " -> ");
-				c.getTheirVars().put(vr.var.getName(), vr.var); //overwrite previous value
-				System.err.print(c.getTheirVars().get(vr.var.getName()).getValue());
+				vr.var.set = true;
+				
+				System.err.print(c.getName() + " - " + varKey + "  " + theirVar.getValue() + " -> ");
+				c.getTheirVars().put(varKey, vr.var); //overwrite previous value
+				System.err.print(c.getTheirVars().get(varKey).getValue());
 				System.err.println();
+			}
+			
+			// check if all variables have come in for this iteration
+			boolean allVarsSet = true;
+			
+			for (Constraint c : constraints.values())
+			{
+				for (Variable<?> var : c.getTheirVars().values())
+				{
+					if (!var.set)
+					{
+						allVarsSet = false;
+						break;
+					}
+				}
+				
+				if (!allVarsSet) break;
+			}
+			
+			// all vars are set, change vars to improve costs
+			if (allVarsSet)
+			{
+				System.out.println("ALL VARS SET YAAAAAYYY");
+				
+				//TODO: cost stuff
+				
+				// unset vars for next iteration
+				for (Constraint c : constraints.values())
+				{
+					for (Variable<?> var : c.getTheirVars().values())
+					{
+						var.set = false;
+					}
+				}
 			}
 		}
 		else

@@ -43,7 +43,7 @@ public class Constraint
 				String agtName = stringVar[0];
 				String varName = stringVar[1];
 				
-				if (neighbors.get(agtName) == null) return;
+				if (neighbors.get(agtName) == null) continue;
 				theirVars.put(variables[i], new Variable(varName, neighbors.get(agtName)));
 			}
 		}

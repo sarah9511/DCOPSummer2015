@@ -11,9 +11,12 @@ public class Variable<T> implements Serializable
 	private Domain<T> domain;
 	private T value;
 	
-	public Identifier owner;
+	private Identifier owner;
+	private boolean ownerSet;
 	
 	private boolean valChanged;
+	
+	public boolean set = false;
 	
 	
 	public Variable(String name, String type, Domain<T> domain)
@@ -24,12 +27,16 @@ public class Variable<T> implements Serializable
 		
 		value = domain.getValues().get((int)(Math.random() * domain.getValues().size()));
 		valChanged = true;
+		
+		ownerSet = false;
 	}
 	
 	public Variable(String name, Identifier owner)
 	{
 		this.name = name;
 		this.owner = owner;
+		
+		ownerSet = true;
 	}
 	
 	
@@ -53,6 +60,11 @@ public class Variable<T> implements Serializable
 		return value;
 	}
 	
+	public Identifier getOwner()
+	{
+		return owner;
+	}
+	
 	public boolean valChanged()
 	{
 		return valChanged;
@@ -67,5 +79,11 @@ public class Variable<T> implements Serializable
 	public void reset()
 	{
 		valChanged = false;
+	}
+	
+	public void setOwner(Identifier owner)
+	{
+		if (!ownerSet) this.owner = owner;
+		ownerSet = true;
 	}
 }
