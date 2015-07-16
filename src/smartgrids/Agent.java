@@ -23,6 +23,8 @@ public class Agent extends UntypedActor
 	
 	private HashMap<String, Identifier> neighbors = new HashMap<>();
 	
+	private String monitorPath = "akka.tcp://monitorSystem@127.0.0.1:2550/user/monitor";
+	
 	//private boolean valChanged;
 	
 	
@@ -59,10 +61,11 @@ public class Agent extends UntypedActor
 	
 	private void sendIdentifyRequests()
 	{
+		System.out.println("Reporting to monitor");
+		getContext().actorSelection(monitorPath).tell(getSelf(), getSelf());
 		for (Identifier neighbor : neighbors.values())
 		{
 			if (neighbor.refSet()) continue;
-			
 			String path = "akka.tcp://" + neighbor.getName() + "System@" + neighbor + "/user/" + neighbor.getName();
 			System.out.println(id.getName() + " is trying to connect with " + path);
 			getContext().actorSelection(path).tell(new Identify(path), getSelf());
@@ -82,6 +85,11 @@ public class Agent extends UntypedActor
 				while (System.currentTimeMillis() - lastTime < 2000);
 				sendIdentifyRequests();
 			}
+			else if (((String)message).equals("report"))
+			{
+				System.err.println("received report message from monitor");
+			}	
+
 		}
 		else if (message instanceof ActorIdentity)
 		{

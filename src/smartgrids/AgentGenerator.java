@@ -172,6 +172,9 @@ public class AgentGenerator extends DefaultHandler
 		
 	 	try
 	 	{
+			//final ActorSystem monitorSystem = ActorSystem.create( "monitorSystem", ConfigFactory.load("config/monitor" ) );
+			//final ActorRef monitor = monitorSystem.actorOf( Props.create(  AgentMonitor.class  ), "monitor" );
+			
 	 		SAXParser sp = spf.newSAXParser();
 	 		AgentGenerator handler = new AgentGenerator();
 	 		sp.parse(new File(args[0]), handler);
