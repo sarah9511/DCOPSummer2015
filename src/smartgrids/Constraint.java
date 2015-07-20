@@ -3,6 +3,7 @@ package smartgrids;
 import java.util.HashMap;
 
 
+@SuppressWarnings("rawtypes")
 public class Constraint
 {
 	private String name;

@@ -17,6 +17,7 @@ import akka.actor.Props;
 import com.typesafe.config.ConfigFactory;
 
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class AgentGenerator extends DefaultHandler
 {
 	private String name;
@@ -24,6 +25,7 @@ public class AgentGenerator extends DefaultHandler
 	private int port;
 	
 	private Identifier id;
+	
 	
 	private HashMap<String, Domain> domains = new HashMap<>();
 	private HashMap<String, Variable> variables = new HashMap<>();
@@ -37,7 +39,6 @@ public class AgentGenerator extends DefaultHandler
 	private Relation curRelation;
 	
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
 	{
@@ -114,6 +115,7 @@ public class AgentGenerator extends DefaultHandler
 		}
 	}
 	
+	
 	@Override
 	public void characters(char ch[], int start, int length) throws SAXException
 	{
@@ -172,17 +174,9 @@ public class AgentGenerator extends DefaultHandler
 		
 	 	try
 	 	{
-			//final ActorSystem monitorSystem = ActorSystem.create( "monitorSystem", ConfigFactory.load("config/monitor" ) );
-			//final ActorRef monitor = monitorSystem.actorOf( Props.create(  AgentMonitor.class  ), "monitor" );
-			
-	 		SAXParser sp = spf.newSAXParser();
+			SAXParser sp = spf.newSAXParser();
 	 		AgentGenerator handler = new AgentGenerator();
 	 		sp.parse(new File(args[0]), handler);
-	 		
-	 		/*sp.parse(new File("test/inputs/agents/agent1.xml"), handler);
-	 		sp.parse(new File("test/inputs/agents/agent2.xml"), handler);
-	 		sp.parse(new File("test/inputs/agents/agent3.xml"), handler);
-	 		*/
 	 	}
 	 	catch (Exception e)
 	 	{
