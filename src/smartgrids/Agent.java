@@ -7,6 +7,7 @@ import java.util.HashMap;
 import smartgrids.message.InfoRequest;
 import smartgrids.message.InfoResponse;
 import smartgrids.message.ValueReport;
+import smartgrids.message.MonitorReport;
 import akka.actor.ActorIdentity;
 import akka.actor.ActorRef;
 import akka.actor.Identify;
@@ -27,6 +28,8 @@ public class Agent extends UntypedActor
 	
 	//private boolean valChanged;
 	
+	private boolean agentActive;   // will be used to monitor termination conditions, determine when monitor should stop agents 
+	
 	
 	public Agent(Identifier id, HashMap<String, Domain<?>> domains, HashMap<String, Variable<?>> variables, HashMap<String, Relation> relations, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors)
 	{
@@ -39,7 +42,7 @@ public class Agent extends UntypedActor
 		
 		this.neighbors = neighbors;
 		
-		//this.valChanged = true;
+		this.agentActive = true;
 		
 		System.out.println("\nAgent " + id.getName() + " alive\n");
 		
@@ -89,6 +92,13 @@ public class Agent extends UntypedActor
 			else if (((String)message).equals("report"))
 			{
 				System.err.println("received report message from monitor");
+				ArrayList<Boolean> varsActive = new ArrayList<Boolean>();
+				for (Variable v : variables.values()){
+					varsActive.add( v.getSet() );
+				}
+				getSender().tell(new MonitorReport( agentActive, varsActive ), getSelf()   );
+				
+				
 			}	
 
 		}
