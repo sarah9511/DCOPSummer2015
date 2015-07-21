@@ -8,7 +8,7 @@ public class Relation
 	private String name;
 	private int arity;
 	private int defaultCost;
-	private String semantics;
+	//private String semantics;
 	
 	private ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 	
@@ -18,7 +18,7 @@ public class Relation
 		this.name = name;
 		this.arity = arity;
 		this.defaultCost = defaultCost;
-		this.semantics = semantics;
+		//this.semantics = semantics;
 	}
 	
 		

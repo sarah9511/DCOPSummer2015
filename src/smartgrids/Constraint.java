@@ -3,6 +3,7 @@ package smartgrids;
 import java.util.HashMap;
 
 
+@SuppressWarnings("rawtypes")
 public class Constraint
 {
 	private String name;
@@ -10,8 +11,8 @@ public class Constraint
 	private String[] variables;
 	private Relation relation;
 	
-	private HashMap<String, Variable> ourVars = new HashMap<>();
-	private HashMap<String, Variable> theirVars = new HashMap<>();
+	private HashMap<String, Variable<?>> ourVars = new HashMap<>();
+	private HashMap<String, Variable<?>> theirVars = new HashMap<>();
 	
 	
 	public Constraint(String name, int arity, String scope, Relation relation)
@@ -24,36 +25,50 @@ public class Constraint
 	}
 	
 	
-	public void setupVars(Identifier thisAgt, HashMap<String, Variable> ourVariables, HashMap<String, Identifier> neighbors)
+	public void setupVars(Identifier thisAgt, HashMap<String, Variable<?>> ourVariables, HashMap<String, Identifier> neighbors)
 	{
-		/*for (int i = 0; i < variables.length; i++)
-		{
-			System.out.print(variables[i] + " ");
-		}
-		System.out.println();*/
-		
+		//for each string in this constraint's variable list
 		for (int i = 0; i < variables.length; i++)
 		{
 			String[] stringVar = variables[i].split(":");
 			
+			//if the variable belongs to this agent 
 			if (stringVar.length == 1)
 			{
-				String var = stringVar[0];
-				
-				ourVars.put(var, ourVariables.get(var));
-				
-				//System.out.println("Our var: " + thisAgt.getName() + " " + var);
+				String varName = stringVar[0];
+				ourVars.put(varName, ourVariables.get(varName));
 			}
+			//the agent belongs to someone else 
 			else
 			{
 				String agtName = stringVar[0];
-				String var = stringVar[1];
+				String varName = stringVar[1];
 				
-				theirVars.put(var, new Variable(var, neighbors.get(agtName)));
-				
-				//System.out.println("Their var: " + agtName + " " + var);
+				if (neighbors.get(agtName) == null) continue;
+				theirVars.put(variables[i], new Variable(varName, neighbors.get(agtName)));
 			}
 		}
+	}
+	
+	
+	public String getName()
+	{
+		return name;
+	}
+	
+	public int getArity()
+	{
+		return arity;
+	}
+	
+	public HashMap<String, Variable<?>> getOurVars()
+	{
+		return ourVars;
+	}
+	
+	public HashMap<String, Variable<?>> getTheirVars()
+	{
+		return theirVars;
 	}
 	
 	

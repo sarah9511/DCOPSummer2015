@@ -1,19 +1,19 @@
 package smartgrids.message;
 
-import smartgrids.Variable;
-import akka.actor.ActorRef;
+import java.io.Serializable;
 
-public class ValueReport
+import smartgrids.Variable;
+
+@SuppressWarnings("serial")
+public class ValueReport implements Serializable
 {
 	public String name;
-	public ActorRef sender;
 	public Variable<?> var;
 	
 	
-	public ValueReport(String name, ActorRef send, Variable<?> var)
+	public ValueReport(String name, Variable<?> var)
 	{
 		this.name = name;
-		this.sender = send;
 		this.var = var;
 	}
 }
