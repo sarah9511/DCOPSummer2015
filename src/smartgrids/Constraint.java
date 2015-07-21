@@ -3,7 +3,7 @@ package smartgrids;
 import java.util.HashMap;
 import java.util.Iterator;
 
-@SuppressWarnings("rawtypes");
+@SuppressWarnings("rawtypes")
 
 public class Constraint
 {
@@ -48,8 +48,8 @@ public class Constraint
 		//for each tuple
 		for(int j = 0; j < r.getTuples().size(); j++){
 
-			HashMap<String, Variable> ourVarlist =  getOurVars();//storing our variables
-			HashMap<String, Variable> theirVarlist = getTheirVars();//storing their variables
+			HashMap<String, Variable<?>> ourVarlist =  getOurVars();//storing our variables
+			HashMap<String, Variable<?>> theirVarlist = getTheirVars();//storing their variables
 			Iterator o = ourVarlist.entrySet().iterator();//iterator for our variables.
 			//Iterating through each variable in the current tuples
 			int i = 0;
