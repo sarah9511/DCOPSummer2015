@@ -1,6 +1,7 @@
 package smartgrids;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 @SuppressWarnings("rawtypes")
@@ -40,59 +41,42 @@ public class Constraint
 	
 	/*
 	 * 
-	 */
-	
+	*/
 	public int retrieveConstraintValue( Relation r){
-		boolean matchFlag = true;
-
+		
 		//for each tuple
 		for(int j = 0; j < r.getTuples().size(); j++){
-
-			HashMap<String, Variable<?>> ourVarlist =  getOurVars();//storing our variables
-			HashMap<String, Variable<?>> theirVarlist = getTheirVars();//storing their variables
-			Iterator o = ourVarlist.entrySet().iterator();//iterator for our variables.
-			//Iterating through each variable in the current tuples
-			int i = 0;
-			HashMap.Entry cVar;
+			ArrayList<Integer> o = new ArrayList(ourVars.values());
+			ArrayList<Integer> t = new ArrayList(theirVars.values());
+			ArrayList<Integer> iTemp = new ArrayList();
 			
-			//iterating through all of our variables
+			for (int i = 0; i <r.getTuples().get(j).getInput().size(); i++){
+				iTemp.add(r.getTuples().get(j).getInput().get(i));
+			}//closing for loop for filling copy array list
 			
-			while(o.hasNext()){
+			for(int k = 0; k < iTemp.size(); k ++){//for each element in the temp array
+				if(o.contains(iTemp.get(k))){//if the int is one of our variables
+					o.remove(iTemp.get(k));//remove from the list of our vars
+					iTemp.remove(k); //remove this element from itemp
+					k--;//setting the index back one to adjust for removal
+				}//closingif block
+				else if(t.contains(iTemp.get(k))){//if the int is one of our variables
+					t.remove(iTemp.get(k));//remove from the list of our vars
+					iTemp.remove(k); //remove this element from itemp
+					k--;//setting index back one to adjust for removal
+				}//closingif block
 				
-				cVar = (HashMap.Entry)o.next();//getting the next element from iterator
-
-				if(!(cVar.getValue().equals(r.getTuples().get(j).getInput().get(i)))){//if the current variable is not equal to its correspondent in the tuple
-					matchFlag = false; //they do not match , so set the flag to false.
-				}//closing if statement block 
-				i++; //incrementing the variable in the tuple that is being examined
 				
-			}//closing while loop.
-			Iterator t = theirVarlist.entrySet().iterator();
+			}//closing for loop that checks each element in iTemp
 			
+			//if the itemp list is empty, that means that each input in the tuples was found in the either our vars or their vars within the constraint information
+			if(iTemp.isEmpty()){
+				return r.getTuples().get(j).getCost();
+			}
 			
-			while(t.hasNext()){
-				
-				cVar = (HashMap.Entry)t.next();//getting the next element from iterator
-
-				if(!(cVar.getValue().equals(r.getTuples().get(j).getInput().get(i)))){//if the current variable is not equal to its correspondent in the tuple
-					matchFlag = false; //they do not match , so set the flag to false.
-				}//closing if statement block 
-				i++; //incrementing the variable in the tuple that is being examined
-				
-			}//closing while loop.
-			
-			//if this tuple turns out to be a match for our variable values
-			if (matchFlag){
-				//
-				int currentCost = r.getTuples().get(j).getCost();
-
-				return currentCost;
-				
-			}//closing if statement 
-
 		}//closing for loop
-
-		return r.getDefault();
+		
+		return r.getDefault(); //returns the default cost because there was no match that could be found.
 
 
 	}//closing function
