@@ -7,10 +7,11 @@ public class Relation
 	private String name;
 	private int arity;
 	private int defaultCost;
-	//private String semantics;
 	
-	//private ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 	private Tuple[] tuples;
+
+	//private String semantics;
+	//private ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 	
 	
 	public Relation(String name, int arity, int defaultCost, String semantics)
@@ -21,7 +22,8 @@ public class Relation
 		//this.semantics = semantics;
 	}
 	
-		
+	
+	//This method fills in the tuples for this relation. it is not included in the constructor because of its complexity
 	public void createTuples(String tuplesString)
 	{
 		tuplesString = tuplesString.trim();
@@ -131,3 +133,4 @@ public class Relation
 		}
 	}
 }
+
