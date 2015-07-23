@@ -79,16 +79,16 @@ public class Agent extends UntypedActor
 	{
 		if (message instanceof String)
 		{
-			System.out.println("Agent " + id.getName() + " received " + (String)message);
 			if (((String)message).equals("identify"))
 			{
+				System.out.println("Agent " + id.getName() + " received " + (String)message);
 				long lastTime = System.currentTimeMillis();
 				while (System.currentTimeMillis() - lastTime < 2000);
 				sendIdentifyRequests();
 			}
 			else if (((String)message).equals("report"))
 			{
-				System.err.println("received report message from monitor");
+				//System.err.println("received report message from monitor");
 			}	
 
 		}

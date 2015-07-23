@@ -1,6 +1,5 @@
 package smartgrids;
 
-import java.util.ArrayList;
 
 
 public class Relation
@@ -10,7 +9,8 @@ public class Relation
 	private int defaultCost;
 	//private String semantics;
 	
-	private ArrayList<Tuple> tuples = new ArrayList<Tuple>();
+	//private ArrayList<Tuple> tuples = new ArrayList<Tuple>();
+	private Tuple[] tuples;
 	
 	
 	public Relation(String name, int arity, int defaultCost, String semantics)
@@ -27,9 +27,11 @@ public class Relation
 		tuplesString = tuplesString.trim();
 		String[] tuplesStrings = tuplesString.split("\\|");
 		
-		int numTuples = tuplesStrings.length;
+		int nTuples = tuplesStrings.length;
 		
-		for (int i = 0; i < numTuples; i++)
+		tuples = new Tuple[nTuples];
+		
+		for (int i = 0; i < nTuples; i++)
 		{
 			String[] tupleSplit = tuplesStrings[i].split(":");
 			
@@ -44,22 +46,23 @@ public class Relation
 			}
 			
 			String[] inputSplit = tupleSplit[1].trim().split(" ");
-			ArrayList<Integer> input = new ArrayList<>();
+			int[] input = new int[inputSplit.length];
 			
 			for (int j = 0; j < inputSplit.length; j++)
 			{
-				input.add(Integer.parseInt(inputSplit[j]));
+				input[j] = Integer.parseInt(inputSplit[j]);
 			}
 			
-			tuples.add(new Tuple(cost, input));
+			tuples[i] = new Tuple(cost, input);
 		}
 	}
 	
+	
 	public void printTuples()
 	{
-		for (int i = 0; i < tuples.size(); i++)
+		for (int i = 0; i < tuples.length; i++)
 		{
-			System.out.println("Tuple " + i + ": " + tuples.get(i));
+			System.out.println("Tuple " + i + ": " + tuples[i]);
 		}
 	}
 	
@@ -74,9 +77,14 @@ public class Relation
 		return arity;
 	}
 	
-	public int getNumTuples()
+	public int getDefaultCost()
 	{
-		return tuples.size();
+		return defaultCost;
+	}
+	
+	public Tuple[] getTuples()
+	{
+		return tuples;
 	}
 	
 	
@@ -86,13 +94,13 @@ public class Relation
 	}
 	
 	
-	private class Tuple
+	public class Tuple
 	{
 		private int cost;
-		private ArrayList<Integer> input;
+		private int[] input;
 
 		
-		public Tuple(int cost, ArrayList<Integer> input)
+		public Tuple(int cost, int[] input)
 		{
 			this.cost = cost;
 			this.input = input;
@@ -104,7 +112,7 @@ public class Relation
 			return cost;
 		}
 		
-		public ArrayList<Integer> getInput()
+		public int[] getInput()
 		{
 			return input;
 		}
@@ -114,9 +122,9 @@ public class Relation
 		{
 			String string = "Cost: " + cost + ", Values: ";
 			
-			for (Integer i : input)
+			for (int i = 0; i < input.length; i++)
 			{
-				string += i + " ";
+				string += input[i] + " ";
 			}
 			
 			return string;

@@ -12,7 +12,7 @@
 	<variables nbVariables="3">
 		<variable name="var1" domain="dom1" />
 		<variable name="var2" domain="dom2" />
-		<variable name="var3" domain="dom3" />
+		<variable name="var3" domain="dom1" />
 	</variables>
 
 	<relations nbRelations="4">
