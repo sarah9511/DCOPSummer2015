@@ -2,18 +2,18 @@ package smartgrids.message;
 
 import java.io.Serializable;
 
-import smartgrids.Variable;
-
 @SuppressWarnings("serial")
 public class ValueReport implements Serializable
 {
-	public String name;
-	public Variable<?> var;
+	public String ownerName;
+	public String varName;
+	public int value;
 	
 	
-	public ValueReport(String name, Variable<?> var)
+	public ValueReport(String ownerName, String varName, int value)
 	{
-		this.name = name;
-		this.var = var;
+		this.ownerName = ownerName;
+		this.varName = varName;
+		this.value = value;
 	}
 }

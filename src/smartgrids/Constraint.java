@@ -13,8 +13,8 @@ public class Constraint
 	private int arity;
 	private String[] variables;
 	private Relation relation;
-	private HashMap<String, Variable<?>> ourVars = new HashMap<>();
-	private HashMap<String, Variable<?>> theirVars = new HashMap<>();
+	private HashMap<String, Variable<Integer>> ourVars = new HashMap<>();
+	private HashMap<String, Variable<Integer>> theirVars = new HashMap<>();
 	
 	
 	public Constraint(String name, int arity, String scope, Relation relation)
@@ -27,7 +27,7 @@ public class Constraint
 	}
 	
 	
-	public void setupVars(Identifier thisAgt, HashMap<String, Variable<?>> ourVariables, HashMap<String, Identifier> neighbors)
+	public void setupVars(Identifier thisAgt, HashMap<String, Variable<Integer>> ourVariables, HashMap<String, Identifier> neighbors)
 	{
 		for (int i = 0; i < variables.length; i++)
 		{
@@ -44,13 +44,18 @@ public class Constraint
 				String agtName = stringVar[0];
 				String varName = stringVar[1];
 				
-				theirVars.put(variables[i], new Variable(varName, neighbors.get(agtName)));
+				theirVars.put(variables[i], new Variable<Integer>(varName, neighbors.get(agtName)));
 			}
+		}
+		
+		for (Variable var : ourVars.values())
+		{
+			var.addConstraint(this);
 		}
 	}
 	
 	
-	public int retrieveConstraintValue()
+	public int calcCost()
 	{
 		Tuple[] tuples = relation.getTuples();
 		
@@ -106,12 +111,12 @@ public class Constraint
 		return arity;
 	}
 	
-	public HashMap<String, Variable<?>> getOurVars()
+	public HashMap<String, Variable<Integer>> getOurVars()
 	{
 		return ourVars;
 	}
 	
-	public HashMap<String, Variable<?>> getTheirVars()
+	public HashMap<String, Variable<Integer>> getTheirVars()
 	{
 		return theirVars;
 	}

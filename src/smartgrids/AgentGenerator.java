@@ -26,14 +26,12 @@ public class AgentGenerator extends DefaultHandler
 	
 	private Identifier id;
 	
-	
 	private HashMap<String, Domain> domains = new HashMap<>();
 	private HashMap<String, Variable> variables = new HashMap<>();
 	private HashMap<String, Relation> relations = new HashMap<>();
 	private HashMap<String, Constraint> constraints = new HashMap<>();
 	
 	private HashMap<String, Identifier> neighbors = new HashMap<>();
-	
 	
 	private Domain curDomain;
 	private Relation curRelation;

@@ -18,7 +18,7 @@ public class Agent extends UntypedActor
 	private Identifier id;
 	
 	//private HashMap<String, Domain<?>> domains = new HashMap<>();
-	private HashMap<String, Variable<?>> variables = new HashMap<>();
+	private HashMap<String, Variable<Integer>> variables = new HashMap<>();
 	//private HashMap<String, Relation> relations = new HashMap<>();
 	private HashMap<String, Constraint> constraints = new HashMap<>();
 	
@@ -31,7 +31,7 @@ public class Agent extends UntypedActor
 	private boolean agentActive;   // will be used to monitor termination conditions, determine when monitor should stop agents 
 	
 	
-	public Agent(Identifier id, HashMap<String, Domain<?>> domains, HashMap<String, Variable<?>> variables, HashMap<String, Relation> relations, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors)
+	public Agent(Identifier id, HashMap<String, Domain<?>> domains, HashMap<String, Variable<Integer>> variables, HashMap<String, Relation> relations, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors)
 	{
 		this.id = id;
 		
@@ -151,22 +151,22 @@ public class Agent extends UntypedActor
 				// initial value report
 				for (Constraint constraint : constraints.values())
 				{
-					Collection<Variable<?>> ourVars = constraint.getOurVars().values();
-					Collection<Variable<?>> theirVars = constraint.getTheirVars().values();
+					Collection<Variable<Integer>> ourVars = constraint.getOurVars().values();
+					Collection<Variable<Integer>> theirVars = constraint.getTheirVars().values();
 					
-					for (Variable<?> theirVar : theirVars)
+					for (Variable<Integer> theirVar : theirVars)
 					{
 						String ownerName = theirVar.getOwner().getName();
 						
 						ActorRef ownerRef = theirVar.getOwner().getActorRef();
 						
-						for (Variable<?> ourVar : ourVars)
+						for (Variable<Integer> ourVar : ourVars)
 						{
 							//if (ourVar.valChanged())
 							if (!sentVars.contains(ourVar.getName() + ":" + theirVar.getOwner().getName()))
 							{
 								System.err.println("sending " + ourVar.getName() + " to " + ownerName);
-								ownerRef.tell(new ValueReport(id.getName(), ourVar), getSelf());
+								ownerRef.tell(new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()), getSelf());
 								ourVar.reset();
 								
 								sentVars.add(ourVar.getName() + ":" + theirVar.getOwner().getName());
@@ -179,23 +179,25 @@ public class Agent extends UntypedActor
 		else  if (message instanceof ValueReport)
 		{
 			ValueReport vr = (ValueReport)message;
-			String varKey = vr.name + ":" + vr.var.getName();
+			String varKey = vr.ownerName + ":" + vr.varName;
 			
-			System.out.println("received a value report from " + vr.name + " - " + vr.var.getName());
+			System.out.println("received a value report from " + vr.ownerName + " - " + vr.varName);
 			
 			for (Constraint c : constraints.values())
 			{
-				Variable<?> theirVar = c.getTheirVars().get(varKey);
+				Variable<Integer> theirVar = c.getTheirVars().get(varKey);
 				
 				if (theirVar == null || theirVar.set)
 				{
 					continue;
 				}
 				
-				vr.var.set = true;
+				//vr.var.set = true;
 				
 				System.err.print(c.getName() + " - " + varKey + "  " + theirVar.getValue() + " -> ");
-				c.getTheirVars().put(varKey, vr.var); //overwrite previous value
+				//c.getTheirVars().put(varKey, vr.var); //overwrite previous value
+				theirVar.setVal(vr.value);
+				theirVar.set = true;
 				System.err.print(c.getTheirVars().get(varKey).getValue());
 				System.err.println();
 			}
@@ -220,14 +222,48 @@ public class Agent extends UntypedActor
 			// all vars are set, change vars to improve costs
 			if (allVarsSet)
 			{
-				System.out.println("ALL VARS SET YAAAAAYYY");
+				System.out.println("ALL VARS SET");
 				
-				//TODO: cost stuff
+				for (Variable<Integer> var : variables.values())
+				{
+					int bestCost = 0;
+					for (Constraint constraint : var.getConstraints())
+					{
+						bestCost += constraint.calcCost();
+					}
+					int oldCost = bestCost;
+					
+					int bestVal = var.getValue();
+					int oldVal = bestVal;
+					
+					ArrayList<Integer> domainValues = var.getDomain().getValues();
+					
+					for (int i = 0; i < domainValues.size(); i++)
+					{
+						var.setVal(domainValues.get(i));
+						
+						int currentCost = 0;
+						for (Constraint constraint : var.getConstraints())
+						{
+							currentCost += constraint.calcCost();
+						}
+						
+						if (currentCost < bestCost)
+						{
+							bestCost = currentCost;
+							bestVal = domainValues.get(i);
+						}
+					}
+					
+					System.out.println("  " + var.getName() + " - " + oldVal + ", " + oldCost + " -> " + bestVal + ", " + bestCost);
+					
+					var.setVal(bestVal);
+				}
 				
 				// unset vars for next iteration
 				for (Constraint c : constraints.values())
 				{
-					System.out.println("  " + c.getName() + " cost: " + c.retrieveConstraintValue());
+					System.out.println("  " + c.getName() + " cost: " + c.calcCost());
 					
 					for (Variable<?> var : c.getTheirVars().values())
 					{

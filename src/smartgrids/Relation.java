@@ -1,7 +1,6 @@
 package smartgrids;
 
 
-
 public class Relation
 {
 	private String name;

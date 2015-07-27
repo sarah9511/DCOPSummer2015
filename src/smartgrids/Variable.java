@@ -1,6 +1,7 @@
 package smartgrids;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 @SuppressWarnings("serial")
 public class Variable<T> implements Serializable
@@ -10,6 +11,8 @@ public class Variable<T> implements Serializable
 	
 	private Domain<T> domain;
 	private T value;
+	
+	private ArrayList<Constraint> constraints = new ArrayList<>();
 	
 	private Identifier owner;
 	private boolean ownerSet;
@@ -40,6 +43,12 @@ public class Variable<T> implements Serializable
 	}
 	
 	
+	public void addConstraint(Constraint constraint)
+	{
+		constraints.add(constraint);
+	}
+	
+	
 	public String getName()
 	{
 		return name;
@@ -58,6 +67,11 @@ public class Variable<T> implements Serializable
 	public T getValue()
 	{
 		return value;
+	}
+	
+	public ArrayList<Constraint> getConstraints()
+	{
+		return constraints;
 	}
 	
 	public Identifier getOwner()
