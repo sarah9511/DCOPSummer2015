@@ -24,16 +24,21 @@ public class AgentMonitor extends UntypedActor
 	private boolean killAll;
 	
 	private HashMap<ActorRef, Boolean> agentTermination; //change to use this map once it is working
+	private HashMap<ActorRef, Integer> reportCounts;
 	
+	private int reportThreshold;
 	
-	public AgentMonitor()
+	public AgentMonitor( int thresh )
 	{
 		checkAgentTimer = new Timer();
 		allAgents = new ArrayList<ActorRef>();
 		toTerminate = new ArrayList<Boolean>();
 		killAll = false;
 		
+		reportThreshold = thresh;
+		
 		agentTermination = new HashMap<ActorRef, Boolean>();
+		reportCounts = new HashMap<ActorRef, Integer>();
 		
 		checkAgentTimer.scheduleAtFixedRate(new checkTask(), 1000, 1000);
 		
@@ -48,14 +53,18 @@ public class AgentMonitor extends UntypedActor
 		{
 			System.out.println("Monitor received new reference");
 			
+			getContext().watch( (ActorRef)message);
 			agentTermination.put((ActorRef)message, false);
+			reportCounts.put(  (ActorRef)message,   0  );
 		}
 		else if (message instanceof MonitorReport)
 		{
-			System.err.println("received a MonitorReport");
 			MonitorReport mr = (MonitorReport) message;
+			reportCounts.put( getSender(),  reportCounts.get(getSender()) + 1  );  //increase report count for this agent
+			System.err.println("\treceived a MonitorReport\n\t\treadyToTerminate: " + agentTermination.get(getSender()) + "\n");
+
 			
-			if (!mr.getActive())
+			if (  (!mr.getActive())  ||   reportCounts.get(getSender())  >  reportThreshold )
 			{
 				//TODO: not tested yet because termination conditions not implemented
 				agentTermination.put(getSender(), true);
@@ -66,7 +75,7 @@ public class AgentMonitor extends UntypedActor
 	public static void main(String args[])
 	{
 		final ActorSystem monitorSystem = ActorSystem.create("monitorSystem", ConfigFactory.load("config/monitor"));
-		monitorSystem.actorOf(Props.create(AgentMonitor.class), "monitor");
+		monitorSystem.actorOf(Props.create(AgentMonitor.class,  5  ), "monitor");
 	}
 	
 	private class checkTask extends TimerTask
@@ -75,10 +84,31 @@ public class AgentMonitor extends UntypedActor
 		{
 			System.err.println("check task running");
 			
+			
+			
 			for (ActorRef sendTo : agentTermination.keySet())
 			{
 				sendTo.tell("report", getSelf());
 			}
+			
+			killAll = true;
+			
+			for(Boolean b : agentTermination.values()){
+				if (b == false){
+					killAll = false;
+					break;
+				}
+			}
+			System.err.println("killAll: " + killAll);
+			if(killAll){
+				for(ActorRef deadLikeDisco : agentTermination.keySet() ){
+					getContext().unwatch( deadLikeDisco );
+					getContext().stop(deadLikeDisco);
+					
+				} 
+				
+			}
+			
 		}
 	}
 }
