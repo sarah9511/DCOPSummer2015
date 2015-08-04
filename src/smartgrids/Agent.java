@@ -101,7 +101,7 @@ public class Agent{
 				continue;
 			}
 			
-			System.err.print(c.getName() + " - " + varKey + "  " + theirVar.getValue() + " -> ");
+			System.err.print('\t' + c.getName() + " - " + varKey + "  " + theirVar.getValue() + " -> ");
 			
 			theirVar.setVal(value);
 			theirVar.set = true;
@@ -130,7 +130,7 @@ public class Agent{
 		// all vars are set, change vars to improve costs
 		if (allVarsSet)
 		{
-			System.out.println("ALL VARS SET");
+			System.out.println("\nALL VARS SET\n");
 			
 			for (Variable<Integer> var : variables.values())
 			{
@@ -163,27 +163,45 @@ public class Agent{
 					}
 				}
 				
-				System.out.println("  " + var.getName() + " - " + oldVal + ", " + oldCost + " -> " + bestVal + ", " + bestCost);
-				
-				var.setVal(bestVal);
+				if (Math.random() > 0.5)
+				{
+					System.out.println('\t' + var.getName() + " - " + oldVal + ", " + oldCost + " -> " + bestVal + ", " + bestCost);
+					var.setVal(bestVal);
+				}
+				else
+				{
+					var.setVal(oldVal);
+				}
 			}
+			
+			System.out.println();
 			
 			// unset vars for next iteration
 			for (Constraint c : constraints.values())
 			{
-				System.out.println("  " + c.getName() + " cost: " + c.calcCost());
+				System.out.println('\t' + c.getName() + " cost: " + c.calcCost());
 				
 				for (Variable<?> var : c.getTheirVars().values())
 				{
 					var.set = false;
 				}
 			}
+			
+			System.out.println();
+			
+			// wait 2 seconds to make sure all agents' receive vals
+			long lastTime = System.currentTimeMillis();
+			while (System.currentTimeMillis() - lastTime < 2000);
+			
+			sendVars();
 		}
 	}
 	
 	
 	private void sendVars()
 	{
+		System.err.println("Sending vars\n");
+		
 		ArrayList<String> sentVars = new ArrayList<>();
 		
 		for (Constraint constraint : constraints.values())
@@ -194,19 +212,19 @@ public class Agent{
 			for (Variable<Integer> theirVar : theirVars)
 			{
 				String ownerName = theirVar.getOwner().getName();
-				
 				ActorRef ownerRef = theirVar.getOwner().getActorRef();
 				
 				for (Variable<Integer> ourVar : ourVars)
 				{
+					String varKey = ourVar.getName() + ':' + ownerName;
+					
 					//if (ourVar.valChanged())
-					if (!sentVars.contains(ourVar.getName() + ":" + theirVar.getOwner().getName()))
+					if (!sentVars.contains(varKey))
 					{
-						System.err.println("sending " + ourVar.getName() + " to " + ownerName);
 						ownerRef.tell(new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()), self);
 						ourVar.reset();
 						
-						sentVars.add(ourVar.getName() + ":" + theirVar.getOwner().getName());
+						sentVars.add(varKey);
 					}
 				}
 			}

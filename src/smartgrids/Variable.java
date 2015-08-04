@@ -101,8 +101,8 @@ public class Variable<T> implements Serializable
 		ownerSet = true;
 	}
 	
-	public boolean getSet(){
-		return this.set;
+	public boolean set()
+	{
+		return set;
 	}
-	
 }

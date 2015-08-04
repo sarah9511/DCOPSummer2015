@@ -75,7 +75,7 @@ public class AgentMonitor extends UntypedActor
 	public static void main(String args[])
 	{
 		final ActorSystem monitorSystem = ActorSystem.create("monitorSystem", ConfigFactory.load("config/monitor"));
-		monitorSystem.actorOf(Props.create(AgentMonitor.class,  5  ), "monitor");
+		monitorSystem.actorOf(Props.create(AgentMonitor.class,  20  ), "monitor");
 	}
 	
 	private class checkTask extends TimerTask

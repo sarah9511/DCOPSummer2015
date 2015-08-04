@@ -43,7 +43,7 @@ public class Mailer extends UntypedActor
 				ArrayList<Boolean> varsActive = new ArrayList<Boolean>();
 				for (Variable<?> v : agent.getVariables().values())
 				{
-					varsActive.add(v.getSet());
+					varsActive.add(v.set());
 				}
 				getSender().tell(new MonitorReport(agent.agentActive(), varsActive), getSelf());
 			}	
