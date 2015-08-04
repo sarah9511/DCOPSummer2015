@@ -64,7 +64,7 @@ public class AgentMonitor extends UntypedActor
 			System.err.println("\treceived a MonitorReport\n\t\treadyToTerminate: " + agentTermination.get(getSender()) + "\n");
 
 			
-			if (  (!mr.getActive())  ||   reportCounts.get(getSender())  >  reportThreshold )
+			if (  (!mr.active)  ||   reportCounts.get(getSender())  >  reportThreshold )
 			{
 				//TODO: not tested yet because termination conditions not implemented
 				agentTermination.put(getSender(), true);

@@ -6,24 +6,13 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class MonitorReport implements Serializable
 {
-	private boolean active;
-	private ArrayList<Boolean> variableStatuses;   //only send whether variables are still being changed so as to avoid having one agent that knows everything?
+	public boolean active;
+	public ArrayList<Boolean> variableStatuses;   //only send whether variables are still being changed so as to avoid having one agent that knows everything?
 	
 	
-	public MonitorReport(boolean agentStatus, ArrayList<Boolean> vars)
+	public MonitorReport(boolean active, ArrayList<Boolean> variableStatuses)
 	{
-		this.active = agentStatus;
-		this.variableStatuses = vars;
-	}
-	
-	
-	public boolean getActive()
-	{
-		return this.active;
-	}
-	
-	public ArrayList<Boolean> getVariableStatuses()
-	{
-		return this.variableStatuses;
+		this.active = active;
+		this.variableStatuses = variableStatuses;
 	}
 }
