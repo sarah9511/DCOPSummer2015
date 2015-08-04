@@ -1,18 +1,17 @@
 package smartgrids;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map;
-import java.util.HashMap;
 
-import smartgrids.message.MonitorReport;
+import com.typesafe.config.ConfigFactory;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-
-import com.typesafe.config.ConfigFactory;
+import smartgrids.message.MonitorReport;
 
 
 public class AgentMonitor extends UntypedActor
@@ -28,7 +27,8 @@ public class AgentMonitor extends UntypedActor
 	
 	private int reportThreshold;
 	
-	public AgentMonitor( int thresh )
+	
+	public AgentMonitor(int thresh)
 	{
 		checkAgentTimer = new Timer();
 		allAgents = new ArrayList<ActorRef>();
@@ -53,18 +53,17 @@ public class AgentMonitor extends UntypedActor
 		{
 			System.out.println("Monitor received new reference");
 			
-			getContext().watch( (ActorRef)message);
+			getContext().watch((ActorRef)message);
 			agentTermination.put((ActorRef)message, false);
-			reportCounts.put(  (ActorRef)message,   0  );
+			reportCounts.put((ActorRef)message, 0);
 		}
 		else if (message instanceof MonitorReport)
 		{
-			MonitorReport mr = (MonitorReport) message;
-			reportCounts.put( getSender(),  reportCounts.get(getSender()) + 1  );  //increase report count for this agent
+			MonitorReport mr = (MonitorReport)message;
+			reportCounts.put(getSender(), reportCounts.get(getSender()) + 1);  //increase report count for this agent
 			System.err.println("\treceived a MonitorReport\n\t\treadyToTerminate: " + agentTermination.get(getSender()) + "\n");
-
 			
-			if (  (!mr.active)  ||   reportCounts.get(getSender())  >  reportThreshold )
+			if ((!mr.active) || reportCounts.get(getSender()) > reportThreshold)
 			{
 				//TODO: not tested yet because termination conditions not implemented
 				agentTermination.put(getSender(), true);
@@ -80,11 +79,10 @@ public class AgentMonitor extends UntypedActor
 	
 	private class checkTask extends TimerTask
 	{
+		@Override
 		public void run()
 		{
 			System.err.println("check task running");
-			
-			
 			
 			for (ActorRef sendTo : agentTermination.keySet())
 			{
@@ -93,22 +91,24 @@ public class AgentMonitor extends UntypedActor
 			
 			killAll = true;
 			
-			for(Boolean b : agentTermination.values()){
-				if (b == false){
+			for (Boolean b : agentTermination.values())
+			{
+				if (b == false)
+				{
 					killAll = false;
 					break;
 				}
 			}
-			System.err.println("killAll: " + killAll);
-			if(killAll){
-				for(ActorRef deadLikeDisco : agentTermination.keySet() ){
-					getContext().unwatch( deadLikeDisco );
-					getContext().stop(deadLikeDisco);
-					
-				} 
-				
-			}
 			
+			System.err.println("killAll: " + killAll);
+			if(killAll)
+			{
+				for(ActorRef deadLikeDisco : agentTermination.keySet())
+				{
+					getContext().unwatch(deadLikeDisco);
+					getContext().stop(deadLikeDisco);
+				} 
+			}
 		}
 	}
 }

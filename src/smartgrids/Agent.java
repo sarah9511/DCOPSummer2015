@@ -17,9 +17,9 @@ public class Agent{
 	
 	private ActorRef self;
 	
-	private boolean agentActive;   // will be used to monitor termination conditions, determine when monitor should stop agents 
+	private boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
 	
-	private String monitorPath = "akka.tcp://monitorSystem@127.0.0.1:2550/user/monitor";
+	//private String monitorPath = "akka.tcp://monitorSystem@127.0.0.1:2550/user/monitor";
 	
 	
 	public Agent(Identifier id, HashMap<String, Variable<Integer>> variables, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors, Mailer mailer, ActorRef self)
@@ -31,10 +31,11 @@ public class Agent{
 		this.mailer = mailer;
 		this.self = self;
 		
-		agentActive = true;
+		active = true;
 		
-		System.out.println("\nAgent " + id.getName() + " is alive\n");
+		System.err.println("\nAgent " + id.getName() + " is alive\n");
 		
+		// print variables
 		System.err.println("Variables:");
 		for (Variable<?> v : variables.values())
 		{
@@ -51,12 +52,17 @@ public class Agent{
 	}
 	
 	
+	/*
+	 * Received info from a neighbor agent. This lets us assign ActorRefs to the Identifiers in the neighbors list
+	 */
 	public void infoResponse(String name, ActorRef sender)
 	{
+		// set ActorRef for corresponding neighbor
 		neighbors.get(name).setActorRef(sender);
 		
-		System.out.println(id.getName() + " received a response from " + name + "!");
+		System.err.println(id.getName() + " received a response from " + name + "!");
 		
+		// flag is set if all neighbors' ActorRefs have been set
 		boolean filledOut = true;
 		
 		// check if neighbors filled out
@@ -69,6 +75,7 @@ public class Agent{
 			}
 		}
 		
+		// if neighbors filled out, set up constraints' variables (see Constraint.setupVars())
 		if (filledOut)
 		{
 			// set up actual variable objects in constraint
@@ -86,12 +93,17 @@ public class Agent{
 		}
 	}
 	
+	/*
+	 * Received a variable value from a neighbor agent
+	 */
 	public void valueReport(String ownerName, String varName, int value)
 	{
+		// key for variable; used in variables HashMap
 		String varKey = ownerName + ":" + varName;
 		
-		System.out.println("received a value report from " + ownerName + " - " + varName);
+		System.err.println("received a value report from " + ownerName + " - " + varName);
 		
+		// find Variable object that this value corresponds to and set it (corresponding Variable object may exist in multiple places)
 		for (Constraint c : constraints.values())
 		{
 			Variable<Integer> theirVar = c.getTheirVars().get(varKey);
@@ -101,18 +113,21 @@ public class Agent{
 				continue;
 			}
 			
+			// before
 			System.err.print('\t' + c.getName() + " - " + varKey + "  " + theirVar.getValue() + " -> ");
 			
 			theirVar.setVal(value);
 			theirVar.set = true;
 			
+			// after
 			System.err.print(c.getTheirVars().get(varKey).getValue());
 			System.err.println();
 		}
 		
-		// check if all variables have come in for this iteration
+		// flag is set if all neighbors' variables are set
 		boolean allVarsSet = true;
 		
+		// check if all variables have come in for this iteration
 		for (Constraint c : constraints.values())
 		{
 			for (Variable<?> var : c.getTheirVars().values())
@@ -130,10 +145,12 @@ public class Agent{
 		// all vars are set, change vars to improve costs
 		if (allVarsSet)
 		{
-			System.out.println("\nALL VARS SET\n");
+			System.err.println("\nALL VARS SET\n");
 			
+			// determine a possible change in value for a variable
 			for (Variable<Integer> var : variables.values())
 			{
+				// best possible cost of this variable
 				int bestCost = 0;
 				for (Constraint constraint : var.getConstraints())
 				{
@@ -141,21 +158,25 @@ public class Agent{
 				}
 				int oldCost = bestCost;
 				
+				// best possible value for this variable
 				int bestVal = var.getValue();
 				int oldVal = bestVal;
 				
 				ArrayList<Integer> domainValues = var.getDomain().getValues();
 				
+				// test each value in variable's domain
 				for (int i = 0; i < domainValues.size(); i++)
 				{
 					var.setVal(domainValues.get(i));
 					
+					// cost for this variable value
 					int currentCost = 0;
 					for (Constraint constraint : var.getConstraints())
 					{
 						currentCost += constraint.calcCost();
 					}
 					
+					// if this value is better, this is the best so far
 					if (currentCost < bestCost)
 					{
 						bestCost = currentCost;
@@ -163,9 +184,10 @@ public class Agent{
 					}
 				}
 				
+				// chance of changing value
 				if (Math.random() > 0.5)
 				{
-					System.out.println('\t' + var.getName() + " - " + oldVal + ", " + oldCost + " -> " + bestVal + ", " + bestCost);
+					System.err.println('\t' + var.getName() + " - " + oldVal + ", " + oldCost + " -> " + bestVal + ", " + bestCost);
 					var.setVal(bestVal);
 				}
 				else
@@ -174,12 +196,12 @@ public class Agent{
 				}
 			}
 			
-			System.out.println();
+			System.err.println();
 			
 			// unset vars for next iteration
 			for (Constraint c : constraints.values())
 			{
-				System.out.println('\t' + c.getName() + " cost: " + c.calcCost());
+				System.err.println('\t' + c.getName() + " cost: " + c.calcCost());
 				
 				for (Variable<?> var : c.getTheirVars().values())
 				{
@@ -187,7 +209,7 @@ public class Agent{
 				}
 			}
 			
-			System.out.println();
+			System.err.println();
 			
 			// wait 2 seconds to make sure all agents' receive vals
 			long lastTime = System.currentTimeMillis();
@@ -198,10 +220,14 @@ public class Agent{
 	}
 	
 	
+	/*
+	 * Send variable values to neighbor agents
+	 */
 	private void sendVars()
 	{
 		System.err.println("Sending vars\n");
 		
+		// list used to keep track of variables sent, don't want to send a variable multiple times
 		ArrayList<String> sentVars = new ArrayList<>();
 		
 		for (Constraint constraint : constraints.values())
@@ -209,16 +235,19 @@ public class Agent{
 			Collection<Variable<Integer>> ourVars = constraint.getOurVars().values();
 			Collection<Variable<Integer>> theirVars = constraint.getTheirVars().values();
 			
+			// we use theirVars because we know the owner of those vars
+			// we know to send ourVars to the owners of theirVars because they share a constraint
 			for (Variable<Integer> theirVar : theirVars)
 			{
 				String ownerName = theirVar.getOwner().getName();
 				ActorRef ownerRef = theirVar.getOwner().getActorRef();
 				
+				// send each of ourVars in this constraint to our neighbor (the owner of theirVar)
 				for (Variable<Integer> ourVar : ourVars)
 				{
 					String varKey = ourVar.getName() + ':' + ownerName;
 					
-					//if (ourVar.valChanged())
+					// if we haven't already sent this var
 					if (!sentVars.contains(varKey))
 					{
 						ownerRef.tell(new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()), self);
@@ -232,29 +261,9 @@ public class Agent{
 	}
 	
 	
-	public HashMap<String, Identifier> getNeighbors()
-	{
-		return neighbors;
-	}
-	
 	public Identifier getId()
 	{
 		return id;
-	}
-	
-	public void setId(Identifier id)
-	{
-		this.id = id;
-	}
-	
-	public Mailer getAgentMailer()
-	{
-		return mailer;
-	}
-	
-	public void setAgentMailer(Mailer agentMailer)
-	{
-		this.mailer = agentMailer;
 	}
 	
 	public HashMap<String, Variable<Integer>> getVariables()
@@ -262,38 +271,13 @@ public class Agent{
 		return variables;
 	}
 	
-	public void setVariables(HashMap<String, Variable<Integer>> variables)
+	public HashMap<String, Identifier> getNeighbors()
 	{
-		this.variables = variables;
+		return neighbors;
 	}
 	
-	public HashMap<String, Constraint> getConstraints()
+	public boolean active()
 	{
-		return constraints;
-	}
-	
-	public void setConstraints(HashMap<String, Constraint> constraints)
-	{
-		this.constraints = constraints;
-	}
-	
-	public String getMonitorPath()
-	{
-		return monitorPath;
-	}
-	
-	public void setMonitorPath(String monitorPath)
-	{
-		this.monitorPath = monitorPath;
-	}
-	
-	public boolean agentActive()
-	{
-		return agentActive;
-	}
-	
-	public void setNeighbors(HashMap<String, Identifier> neighbors)
-	{
-		this.neighbors = neighbors;
+		return active;
 	}
 }

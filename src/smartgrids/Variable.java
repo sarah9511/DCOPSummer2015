@@ -100,9 +100,4 @@ public class Variable<T> implements Serializable
 		if (!ownerSet) this.owner = owner;
 		ownerSet = true;
 	}
-	
-	public boolean set()
-	{
-		return set;
-	}
 }
