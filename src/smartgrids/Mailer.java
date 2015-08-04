@@ -15,22 +15,19 @@ import akka.actor.UntypedActor;
 
 public class Mailer extends UntypedActor 
 {
-	
-	
-
-	
-	private String monitorPath = "akka.tcp://monitorSystem@127.0.0.1:2550/user/monitor";
+	private Agent agent;
 	
 	//private boolean valChanged;
 	
-	private boolean mailerActive;   // will be used to monitor termination conditions, determine when monitor should stop agents 
-
-	private Agent a;
-	public Mailer(Agent agent){
-		this.mailerActive = true;
-		a = agent;
-		//System.out.println("\nAgent " + id.getName() + " alive\n");	
-		
+	private boolean mailerActive;   // will be used to monitor termination conditions, determine when monitor should stop agents
+	
+	private String monitorPath = "akka.tcp://monitorSystem@127.0.0.1:2550/user/monitor";
+	
+	
+	public Mailer(Identifier id, HashMap<String, Variable<Integer>> variables, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors)
+	{
+		agent = new Agent(id, variables, constraints, neighbors, this);
+		mailerActive = true;
 	}
 	
 	
@@ -39,11 +36,11 @@ public class Mailer extends UntypedActor
 		System.out.println("Reporting to monitor");
 		getContext().actorSelection(monitorPath).tell(getSelf(), getSelf());
 		
-		for (Identifier neighbor : a.getNeighbors().values())
+		for (Identifier neighbor : agent.getNeighbors().values())
 		{
 			if (neighbor.refSet()) continue;
 			String path = "akka.tcp://" + neighbor.getName() + "System@" + neighbor + "/user/" + neighbor.getName();
-			System.out.println(a.getId().getName() + " is trying to connect with " + path);
+			System.out.println(agent.getId().getName() + " is trying to connect with " + path);
 			getContext().actorSelection(path).tell(new Identify(path), getSelf());
 		}
 	}
@@ -56,7 +53,7 @@ public class Mailer extends UntypedActor
 		{
 			if (((String)message).equals("identify"))
 			{
-				System.out.println("Agent " + a.getId().getName() + " received " + (String)message);
+				System.out.println("Agent " + agent.getId().getName() + " received " + (String)message);
 				long lastTime = System.currentTimeMillis();
 				while (System.currentTimeMillis() - lastTime < 2000);
 				sendIdentifyRequests();
@@ -65,11 +62,11 @@ public class Mailer extends UntypedActor
 			{
 				//System.err.println("received report message from monitor");
 				ArrayList<Boolean> varsActive = new ArrayList<Boolean>();
-				for (Variable<?> v : a.getVariables().values())
+				for (Variable<?> v : agent.getVariables().values())
 				{
 					varsActive.add(v.getSet());
 				}
-				getSender().tell(new MonitorReport( mailerActive, varsActive ), getSelf()   );
+				getSender().tell(new MonitorReport(mailerActive, varsActive), getSelf());
 			}	
 		}
 		else if (message instanceof ActorIdentity)
@@ -78,26 +75,26 @@ public class Mailer extends UntypedActor
 			
 			if (responder != null)
 			{
-				System.out.println(a.getId().getName() + " received actor identity");
+				System.out.println(agent.getId().getName() + " received actor identity");
 				responder.tell(new InfoRequest(), getSelf());
 			}
 		}
 		else if (message instanceof InfoRequest)
 		{
-			System.out.println(a.getId().getName() + " received info request");
-			getSender().tell(new InfoResponse(a.getId().getName()), getSelf());
+			System.out.println(agent.getId().getName() + " received info request");
+			getSender().tell(new InfoResponse(agent.getId().getName()), getSelf());
 		}
 		else if (message instanceof InfoResponse)
 		{
 			String name = ((InfoResponse)message).name;
-			a.getNeighbors().get(name).setActorRef(getSender());
+			agent.getNeighbors().get(name).setActorRef(getSender());
 			
-			System.out.println(a.getId().getName() + " received a response from " + name + "!");
+			System.out.println(agent.getId().getName() + " received a response from " + name + "!");
 			
 			boolean filledOut = true;
 			
 			// check if neighbors filled out
-			for (Identifier id : a.getNeighbors().values())
+			for (Identifier id : agent.getNeighbors().values())
 			{
 				if (!id.refSet())
 				{
@@ -109,9 +106,9 @@ public class Mailer extends UntypedActor
 			if (filledOut)
 			{
 				// set up actual variable objects in constraint
-				for (Constraint constraint : a.getConstraints().values())
+				for (Constraint constraint : agent.getConstraints().values())
 				{
-					constraint.setupVars(a.getId(), a.getVariables(), a.getNeighbors());
+					constraint.setupVars(agent.getId(), agent.getVariables(), agent.getNeighbors());
 				}
 				
 				// wait 2 seconds to make sure all agents' constraints are set up
@@ -121,7 +118,7 @@ public class Mailer extends UntypedActor
 				ArrayList<String> sentVars = new ArrayList<>();
 				
 				// initial value report
-				for (Constraint constraint : a.getConstraints().values())
+				for (Constraint constraint : agent.getConstraints().values())
 				{
 					Collection<Variable<Integer>> ourVars = constraint.getOurVars().values();
 					Collection<Variable<Integer>> theirVars = constraint.getTheirVars().values();
@@ -138,7 +135,7 @@ public class Mailer extends UntypedActor
 							if (!sentVars.contains(ourVar.getName() + ":" + theirVar.getOwner().getName()))
 							{
 								System.err.println("sending " + ourVar.getName() + " to " + ownerName);
-								ownerRef.tell(new ValueReport(a.getId().getName(), ourVar.getName(), ourVar.getValue()), getSelf());
+								ownerRef.tell(new ValueReport(agent.getId().getName(), ourVar.getName(), ourVar.getValue()), getSelf());
 								ourVar.reset();
 								
 								sentVars.add(ourVar.getName() + ":" + theirVar.getOwner().getName());
@@ -155,7 +152,7 @@ public class Mailer extends UntypedActor
 			
 			System.out.println("received a value report from " + vr.ownerName + " - " + vr.varName);
 			
-			for (Constraint c : a.getConstraints().values())
+			for (Constraint c : agent.getConstraints().values())
 			{
 				Variable<Integer> theirVar = c.getTheirVars().get(varKey);
 				
@@ -177,7 +174,7 @@ public class Mailer extends UntypedActor
 			// check if all variables have come in for this iteration
 			boolean allVarsSet = true;
 			
-			for (Constraint c : a.getConstraints().values())
+			for (Constraint c : agent.getConstraints().values())
 			{
 				for (Variable<?> var : c.getTheirVars().values())
 				{
@@ -196,7 +193,7 @@ public class Mailer extends UntypedActor
 			{
 				System.out.println("ALL VARS SET");
 				
-				for (Variable<Integer> var : a.getVariables().values())
+				for (Variable<Integer> var : agent.getVariables().values())
 				{
 					int bestCost = 0;
 					for (Constraint constraint : var.getConstraints())
@@ -233,7 +230,7 @@ public class Mailer extends UntypedActor
 				}
 				
 				// unset vars for next iteration
-				for (Constraint c : a.getConstraints().values())
+				for (Constraint c : agent.getConstraints().values())
 				{
 					System.out.println("  " + c.getName() + " cost: " + c.calcCost());
 					

@@ -159,7 +159,7 @@ public class AgentGenerator extends DefaultHandler
 	public void generateAgent()
 	{
 		final ActorSystem system = ActorSystem.create(name + "System", ConfigFactory.load("config/" + name + "conf"));
-		final ActorRef agent = system.actorOf(Props.create(Agent.class, id, domains, variables, relations, constraints, neighbors), name);
+		final ActorRef agent = system.actorOf(Props.create(Mailer.class, id, variables, constraints, neighbors), name);
 		
 		id.setActorRef(agent);
 		agent.tell("identify", null);
