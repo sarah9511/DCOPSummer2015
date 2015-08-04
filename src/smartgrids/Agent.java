@@ -146,34 +146,8 @@ public class Agent extends UntypedActor
 				long lastTime = System.currentTimeMillis();
 				while (System.currentTimeMillis() - lastTime < 2000);
 				
-				ArrayList<String> sentVars = new ArrayList<>();
-				
 				// initial value report
-				for (Constraint constraint : constraints.values())
-				{
-					Collection<Variable<Integer>> ourVars = constraint.getOurVars().values();
-					Collection<Variable<Integer>> theirVars = constraint.getTheirVars().values();
-					
-					for (Variable<Integer> theirVar : theirVars)
-					{
-						String ownerName = theirVar.getOwner().getName();
-						
-						ActorRef ownerRef = theirVar.getOwner().getActorRef();
-						
-						for (Variable<Integer> ourVar : ourVars)
-						{
-							//if (ourVar.valChanged())
-							if (!sentVars.contains(ourVar.getName() + ":" + theirVar.getOwner().getName()))
-							{
-								System.err.println("sending " + ourVar.getName() + " to " + ownerName);
-								ownerRef.tell(new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()), getSelf());
-								ourVar.reset();
-								
-								sentVars.add(ourVar.getName() + ":" + theirVar.getOwner().getName());
-							}
-						}
-					}
-				}
+				sendVariables();
 			}
 		}
 		else  if (message instanceof ValueReport)
@@ -257,7 +231,7 @@ public class Agent extends UntypedActor
 					
 					System.out.println("  " + var.getName() + " - " + oldVal + ", " + oldCost + " -> " + bestVal + ", " + bestCost);
 					
-					var.setVal(bestVal);
+					if (Math.random() >= 0.5) var.setVal(bestVal);
 				}
 				
 				// unset vars for next iteration
@@ -270,11 +244,49 @@ public class Agent extends UntypedActor
 						var.set = false;
 					}
 				}
+				
+				// wait 2 seconds to make sure all agents' constraints are set up
+				long lastTime = System.currentTimeMillis();
+				while (System.currentTimeMillis() - lastTime < 2000);
+				
+				sendVariables();
 			}
 		}
 		else
 		{
 			unhandled(message);
+		}
+	}
+	
+	
+	public void sendVariables()
+	{
+		ArrayList<String> sentVars = new ArrayList<>();
+		
+		for (Constraint constraint : constraints.values())
+		{
+			Collection<Variable<Integer>> ourVars = constraint.getOurVars().values();
+			Collection<Variable<Integer>> theirVars = constraint.getTheirVars().values();
+			
+			for (Variable<Integer> theirVar : theirVars)
+			{
+				String ownerName = theirVar.getOwner().getName();
+				
+				ActorRef ownerRef = theirVar.getOwner().getActorRef();
+				
+				for (Variable<Integer> ourVar : ourVars)
+				{
+					//if (ourVar.valChanged())
+					if (!sentVars.contains(ourVar.getName() + ":" + theirVar.getOwner().getName()))
+					{
+						System.err.println("sending " + ourVar.getName() + " to " + ownerName);
+						ownerRef.tell(new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()), getSelf());
+						ourVar.reset();
+						
+						sentVars.add(ourVar.getName() + ":" + theirVar.getOwner().getName());
+					}
+				}
+			}
 		}
 	}
 }
