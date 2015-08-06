@@ -15,11 +15,20 @@ public class Identifier implements Serializable
 	private boolean refSet = false;
 	//private List<Variable> agentVars;
 	
+	private boolean msgSent;
+	private boolean msgReceived;
+	int cycleCount;
+	
 	public Identifier(String name, String ip, int port)
 	{
 		this.name = name;
 		this.ip = ip;
 		this.port = port;
+		
+		msgSent = msgReceived = false;
+		cycleCount = 0;
+		
+		
 		//this.agentVars = new ArrayList<Variable>();
 	}
 	
@@ -67,4 +76,25 @@ public class Identifier implements Serializable
 	{
 		return ip + ':' + port;
 	}
+	
+	public void setMsgSent(boolean b){
+		msgSent = b;
+	}
+	
+	public void setMsgReceived(boolean b){
+		msgReceived = b;
+	}
+
+	public boolean getMsgSent (){
+		return msgSent;
+	}
+	
+	public boolean getMsgReceived(){
+		return msgReceived;
+	}
+	
+	public  int getCycleCount(){
+		return cycleCount;
+	}
+	
 }

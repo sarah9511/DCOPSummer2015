@@ -4,10 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import akka.actor.ActorRef;
 import smartgrids.message.ValueReport;
 
 public class Agent{
+
+	private static final int cycleThreshold = 20;
+	private int currentCycle;
 
 	private Identifier id;
 	private HashMap<String, Variable<Integer>> variables = new HashMap<>();
@@ -18,6 +24,8 @@ public class Agent{
 	private ActorRef self;
 	
 	private boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
+	
+	private Timer cycleCheckTimer;
 	
 	//private String monitorPath = "akka.tcp://monitorSystem@127.0.0.1:2550/user/monitor";
 	
@@ -31,7 +39,13 @@ public class Agent{
 		this.mailer = mailer;
 		this.self = self;
 		
+		
+		
 		active = true;
+		currentCycle = 0;
+		cycleCheckTimer = new Timer();
+		cycleCheckTimer.scheduleAtFixedRate( new CycleCheck(), 1000, 1500  );
+		
 		
 		System.err.println("\nAgent " + id.getName() + " is alive\n");
 		
@@ -280,4 +294,27 @@ public class Agent{
 	{
 		return active;
 	}
+	
+	
+	class CycleCheck extends TimerTask{
+		
+		@Override
+		public void run(){
+			System.err.println("cycle checker running");
+			if (!active) return;
+			
+			int lowest = 999;
+			for (Identifier n : neighbors.values()){
+				//var updating / handshake goes here?
+				
+				if(n.getCycleCount() < lowest) lowest = n.getCycleCount();
+			}
+			currentCycle = lowest;
+			if(lowest >= cycleThreshold) active = false;
+			System.err.println("Agent  " + id.getName() + " is on cycle " + currentCycle);
+		}
+		
+	}
+	
+	
 }
