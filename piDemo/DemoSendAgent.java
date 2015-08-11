@@ -28,8 +28,10 @@ public class DemoSendAgent extends UntypedActor{
 	}
 	
 	public static void main(String args[]){
+
 		//creating agent
 		final ActorSystem system = ActorSystem.create(   name + "System", ConfigFactory.load("config/" + name) );
+
 		sender = system.actorOf(Props.create(DemoSendAgent.class), name);
 		
 		//wait for other agent to be created.
