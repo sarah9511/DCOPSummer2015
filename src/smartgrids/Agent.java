@@ -15,21 +15,18 @@ public class Agent{
 	private HashMap<String, Identifier> neighbors = new HashMap<>();
 	private Mailer mailer;
 	
-	private ActorRef self;
-	
 	private boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
 	
 	//private String monitorPath = "akka.tcp://monitorSystem@127.0.0.1:2550/user/monitor";
 	
 	
-	public Agent(Identifier id, HashMap<String, Variable<Integer>> variables, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors, Mailer mailer, ActorRef self)
+	public Agent(Identifier id, HashMap<String, Variable<Integer>> variables, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors, Mailer mailer)
 	{
 		this.id = id;
 		this.variables = variables;
 		this.constraints = constraints;
 		this.neighbors = neighbors;
 		this.mailer = mailer;
-		this.self = self;
 		
 		active = true;
 		
@@ -250,7 +247,8 @@ public class Agent{
 					// if we haven't already sent this var
 					if (!sentVars.contains(varKey))
 					{
-						ownerRef.tell(new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()), self);
+						mailer.send(ownerRef, new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()));
+						//ownerRef.tell(new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()), self);
 						ourVar.reset();
 						
 						sentVars.add(varKey);
