@@ -10,10 +10,16 @@ import java.util.TimerTask;
 import akka.actor.ActorRef;
 import smartgrids.message.ValueReport;
 
+import java.lang.Thread;
+
 public class Agent{
 
 	private static final int cycleThreshold = 20;
 	private int currentCycle;
+	private int currCycleStartTime;
+	private int betterCostThreshold = 10;
+	private int iterationsSinceBetterCost;
+	private boolean currCycleComplete;
 
 	private Identifier id;
 	private HashMap<String, Variable<Integer>> variables = new HashMap<>();
@@ -24,7 +30,7 @@ public class Agent{
 	private boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
 	
 	private Timer cycleCheckTimer;
-	
+	public boolean neighborReadyStatus;
 	//private String monitorPath = "akka.tcp://monitorSystem@127.0.0.1:2550/user/monitor";
 	
 	
@@ -40,8 +46,10 @@ public class Agent{
 		
 		active = true;
 		currentCycle = 0;
+		currCycleComplete = false;
+		iterationsSinceBetterCost = 0;
 		cycleCheckTimer = new Timer();
-		cycleCheckTimer.scheduleAtFixedRate( new CycleCheck(), 1000, 1500  );
+		
 		
 		
 		System.err.println("\nAgent " + id.getName() + " is alive\n");
@@ -60,6 +68,7 @@ public class Agent{
 			System.err.println();
 		}
 		System.err.println();
+		cycleCheckTimer.scheduleAtFixedRate( new CycleCheck(), 5000, 500  );
 	}
 	
 	
@@ -157,10 +166,11 @@ public class Agent{
 		if (allVarsSet)
 		{
 			System.err.println("\nALL VARS SET\n");
-			
+			boolean betterFound = false;
 			// determine a possible change in value for a variable
 			for (Variable<Integer> var : variables.values())
 			{
+				
 				// best possible cost of this variable
 				int bestCost = 0;
 				for (Constraint constraint : var.getConstraints())
@@ -190,10 +200,15 @@ public class Agent{
 					// if this value is better, this is the best so far
 					if (currentCost < bestCost)
 					{
+						betterFound = true;
+						iterationsSinceBetterCost = 0;
 						bestCost = currentCost;
 						bestVal = domainValues.get(i);
-					}
+					} 
+					
 				}
+				
+				if (!betterFound) iterationsSinceBetterCost++;		
 				
 				// chance of changing value
 				if (Math.random() > 0.5)
@@ -293,23 +308,36 @@ public class Agent{
 		return active;
 	}
 	
+	public boolean getCurrCycleComplete(){
+		return currCycleComplete;
+	}
+	
+	
+	
 	
 	class CycleCheck extends TimerTask{
 		
 		@Override
 		public void run(){
-			//System.err.println("cycle checker running");
-			if (!active) return;
-			
-			int lowest = 999;
-			for (Identifier n : neighbors.values()){
-				//var updating / handshake goes here?
-				
-				if(n.getCycleCount() < lowest) lowest = n.getCycleCount();
+			System.err.println("in cycle check; number of iterations:" + iterationsSinceBetterCost  + "\n");
+
+			if ( iterationsSinceBetterCost > betterCostThreshold ){
+				currCycleComplete = true;								//pre-ready state
+				System.err.println(" current cycle complete ");
 			}
-			currentCycle = lowest;
-			if(lowest >= cycleThreshold) active = false;
-			//System.err.println("Agent  " + id.getName() + " is on cycle " + currentCycle);
+			boolean terminate = true;
+			for ( Identifier n : neighbors.values() ){
+				mailer.send( n.getActorRef(), "cycleCheck" );
+				if (!neighborReadyStatus){
+					terminate = false;
+					break;
+				}
+			}
+			if(terminate){
+				//have all agents agree,
+				//commit seppuku
+			}
+			
 		}
 		
 	}

@@ -109,7 +109,10 @@ public class Mailer extends UntypedActor
 				}
 				send(getSender(), new MonitorReport(agent.active(), varsActive));
 				//getSender().tell(new MonitorReport(agent.active(), varsActive), getSelf());
-			}	
+			}
+			else if (((String)message).equals("cycleCheck")){
+				send( getSender() , new Boolean( agent.getCurrCycleComplete() ) )
+			}
 		}
 		// received an ActorIdentity as response to our identify
 		else if (message instanceof ActorIdentity)
@@ -141,6 +144,11 @@ public class Mailer extends UntypedActor
 			// pass this ValueReport data to the agent so that the agent may deal with it
 			ValueReport vr = (ValueReport)message;
 			agent.valueReport(vr.ownerName, vr.varName, vr.value);
+		}
+		else if (message instanceof Boolean){
+			synchronized(agent.neighborReadyStatus){		//lock neighbor ready status so iterations of CycleCheck wait until it is set to continue; this may need to happen earlier
+				agent.neighborReadyStatus = (Boolean)message;
+			}
 		}
 		else
 		{
