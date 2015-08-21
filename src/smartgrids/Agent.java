@@ -27,7 +27,7 @@ public class Agent{
 	private HashMap<String, Identifier> neighbors = new HashMap<>();
 	private Mailer mailer;
 	
-	private boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
+	private Boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
 	
 	private Timer cycleCheckTimer;
 	public boolean neighborReadyStatus;
