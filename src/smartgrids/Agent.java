@@ -298,7 +298,7 @@ public class Agent{
 		
 		@Override
 		public void run(){
-			System.err.println("cycle checker running");
+			//System.err.println("cycle checker running");
 			if (!active) return;
 			
 			int lowest = 999;
@@ -309,7 +309,7 @@ public class Agent{
 			}
 			currentCycle = lowest;
 			if(lowest >= cycleThreshold) active = false;
-			System.err.println("Agent  " + id.getName() + " is on cycle " + currentCycle);
+			//System.err.println("Agent  " + id.getName() + " is on cycle " + currentCycle);
 		}
 		
 	}
