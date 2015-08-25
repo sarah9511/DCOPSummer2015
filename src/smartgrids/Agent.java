@@ -12,8 +12,8 @@ import smartgrids.message.ValueReport;
 
 import java.lang.Thread;
 
-public class Agent{
-
+public class Agent
+{
 	private static final int cycleThreshold = 20;
 	private int currentCycle;
 	private int currCycleStartTime;

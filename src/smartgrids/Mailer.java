@@ -40,9 +40,9 @@ public class Mailer extends UntypedActor
 		if (message instanceof Pack)
 		{
 			Pack pack = (Pack)message;
-			//int id = pack.id;
+			int id = pack.id;
 			Object msg = pack.message;
-			/*ActorRef sender = getSender();
+			ActorRef sender = getSender();
 			
 			// if this actor isn't in the messageIDs list yet
 			if (!messageIDs.containsKey(sender)) messageIDs.put(sender, new ArrayList<Integer>());
@@ -52,17 +52,20 @@ public class Mailer extends UntypedActor
 			// if we've already received this message
 			if (messageIDs.get(sender).contains(id)) return;
 			
-			messageIDs.get(sender).add(id);*/
+			messageIDs.get(sender).add(id);
 			
 			receive(msg);
 		}
-		/*else if (message instanceof Ack)
+		else if (message instanceof Ack)
 		{
 			int id = ((Ack)message).id;
 			
-			acks.get(id).cancel();
-			acks.remove(id);
-		}*/
+			if (acks.containsKey(id))
+			{
+				acks.get(id).cancel();
+				acks.remove(id);
+			}
+		}
 		else
 		{
 			receive(message);
@@ -72,15 +75,14 @@ public class Mailer extends UntypedActor
 	
 	public void send(ActorRef receiver, Object message)
 	{
-		/*Timer timer = new Timer();
+		Timer timer = new Timer();
 		acks.put(curID, timer);
-		*/
+		
 		receiver.tell(new Pack(curID, message), getSelf());
-		/*
-		timer.schedule(new AckTask(receiver, message, curID), 100);
+		
+		timer.schedule(new AckTask(receiver, message, curID), 1000);
 		
 		curID++;
-		*/
 	}
 
 	public void receive(Object message)
@@ -199,13 +201,16 @@ public class Mailer extends UntypedActor
 		@Override
 		public void run()
 		{
-			receiver.tell(new Pack(id, message), getSelf());
-			
-			acks.get(id).cancel();
-			
-			Timer timer = new Timer();
-			timer.schedule(new AckTask(receiver, message, id), 100);
-			acks.put(id, timer);
+			if (acks.containsKey(id))
+			{
+				receiver.tell(new Pack(id, message), getSelf());
+				
+				acks.get(id).cancel();
+				
+				Timer timer = new Timer();
+				timer.schedule(new AckTask(receiver, message, id), 1000);
+				acks.put(id, timer);
+			}
 		}
 	}
 }
