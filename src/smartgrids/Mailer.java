@@ -15,6 +15,7 @@ import smartgrids.message.InfoResponse;
 import smartgrids.message.MonitorReport;
 import smartgrids.message.Pack;
 import smartgrids.message.ValueReport;
+import smartgrids.message.ReadyMessage;
 
 public class Mailer extends UntypedActor 
 {
@@ -147,11 +148,10 @@ public class Mailer extends UntypedActor
 			ValueReport vr = (ValueReport)message;
 			agent.valueReport(vr.ownerName, vr.varName, vr.value);
 		}
-		else if (message instanceof Boolean){
-			//synchronized(agent.neighborReadyStatus){		//lock neighbor ready status so iterations of CycleCheck wait until it is set to continue; this may need to happen earlier
-				agent.neighborReadyStatus = (Boolean)message;
-			//}
-		}
+        else if (message instanceof ReadyMessage){
+            agent.receiveReadyMessage( (ReadyMessage)message );
+            System.err.println("Received ready message from neighbor");
+        }
 		else
 		{
 			unhandled(message);

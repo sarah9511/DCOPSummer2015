@@ -9,6 +9,7 @@ import java.util.TimerTask;
 
 import akka.actor.ActorRef;
 import smartgrids.message.ValueReport;
+import smartgrids.message.ReadyMessage;
 
 import java.lang.Thread;
 
@@ -25,6 +26,7 @@ public class Agent
 	private HashMap<String, Variable<Integer>> variables = new HashMap<>();
 	private HashMap<String, Constraint> constraints = new HashMap<>();
 	private HashMap<String, Identifier> neighbors = new HashMap<>();
+    private HashMap<String, ReadyMessage> neighborsReady = new HashMap<>();
 	private Mailer mailer;
 	
 	private Boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
@@ -68,7 +70,7 @@ public class Agent
 			System.err.println();
 		}
 		System.err.println();
-		cycleCheckTimer.scheduleAtFixedRate( new CycleCheck(), 5000, 500  );
+		//cycleCheckTimer.scheduleAtFixedRate( new CycleCheck(), 5000, 500  );  // move this functionality to valueReport
 	}
 	
 	
@@ -202,13 +204,39 @@ public class Agent
 					{
 						betterFound = true;
 						iterationsSinceBetterCost = 0;
+                        currCycleComplete = false;
 						bestCost = currentCost;
 						bestVal = domainValues.get(i);
 					} 
 					
 				}
 				
-				if (!betterFound) iterationsSinceBetterCost++;		
+				// increment cycle condition based on time since an improvement was found
+				if (!betterFound){ 
+                    iterationsSinceBetterCost++;
+                    System.err.println( "current number of iterations since last improvement: " + iterationsSinceBetterCost );
+                }		
+				
+				// what to do if this agent is ready to move to next cycle: notify all neighbors
+				if (iterationsSinceBetterCost >= cycleThreshold){
+                    currCycleComplete = true;
+                    //notify neighbors this agent is ready
+                    for (Identifier n : neighbors.values()){
+                        mailer.send( n.getActorRef() , new ReadyMessage( currCycleComplete, id.getName() ) );
+                        
+                    }
+                    
+                    //if all ready messages received, call sendVars, move on to next cycle, clear all ready messages
+                    if ( neighborsReady.size() == neighbors.size() ){
+                        System.err.println("ALL AGENTS READY FOR NEXT CYCLE");
+                        iterationsSinceBetterCost = 0;
+                        currentCycle++;
+                        neighborsReady.clear();
+                        sendVars();
+                        
+                    }
+                    
+				}
 				
 				// chance of changing value
 				if (Math.random() > 0.5)
@@ -312,7 +340,9 @@ public class Agent
 		return currCycleComplete;
 	}
 	
-	
+	public void receiveReadyMessage( ReadyMessage rm ){
+        neighborsReady.put( rm.getName(), rm );
+    }
 	
 	
 	class CycleCheck extends TimerTask{
@@ -333,7 +363,7 @@ public class Agent
 					break;
 				}
 			}
-			if(terminate){
+			if(terminate && currCycleComplete){
 				//have all agents agree,
 				//commit seppuku
 			}

@@ -100,15 +100,15 @@ public class AgentMonitor extends UntypedActor
 				}
 			}
 			
-			System.err.println("killAll: " + killAll);
-			if(killAll)
-			{
-				for(ActorRef deadLikeDisco : agentTermination.keySet())
-				{
-					getContext().unwatch(deadLikeDisco);
-					getContext().stop(deadLikeDisco);
-				} 
-			}
+			// System.err.println("killAll: " + killAll);
+			// if(killAll)
+			// {
+				// for(ActorRef deadLikeDisco : agentTermination.keySet())
+				// {
+					// getContext().unwatch(deadLikeDisco);
+					// getContext().stop(deadLikeDisco);
+				// } 
+			// }
 		}
 	}
 }
