@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<agents>
+    <agent>
+        <id name="agt1_4" ip="127.0.0.1" port="2552" />
+        <domains>
+            <domain name="agt1_dom" nbValues="2" datatype="int">0..1</domain>
+        </domains>
+        <variables>
+            <variable name="var1_4" domain="agt1_dom"/>
+        </variables>
+    </agent>
+
+    <agent>
+        <id name="agt2_4" ip="127.0.0.1" port="2553" />
+        <domains>
+            <domain name="agt2_dom" nbValues="2" datatype="int">0..1</domain>
+        </domains>
+        <variables>
+            <variable name="var2_4" domain="agt2_dom"/>
+        </variables>
+    </agent>
+    
+    <agent>
+        <id name="agt3_4" ip="127.0.0.1" port="2554" />
+        <domains>
+            <domain name="agt3_dom" nbValues="2" datatype="int">0..1</domain>
+        </domains>
+        <variables>
+            <variable name="var3_4" domain="agt3_dom"/>
+        </variables>
+    </agent>
+    
+    <agent>
+        <id name="agt4_4" ip="127.0.0.1" port="2555" />
+        <domains>
+            <domain name="agt4_dom" nbValues="2" datatype="int">0..1</domain>
+        </domains>
+        <variables>
+            <variable name="var4_4" domain="agt4_dom"/>
+        </variables>
+    </agent>
+    
+    <relations>
+        <relation name="4agtRelation" arity="4" defaultCost="100" nbTuples="5" semantics="soft" >
+            200:0 0 0 0 |10:1 0 1 0 |50:0 1 0 1 |5:1 0 0 1 |100:0 0 0 1
+        </relation>
+    </relations>
+    
+    <constraints nbConstraints="1">
+        <constraint name="con1" arity="4" scope="agt1_4:var1_4 agt2_4:var2_4 agt3_4:var3_4 agt4_4:var4_4" reference="4agtRelation" />
+    </constraints>
+    
+    
+    
+</agents>

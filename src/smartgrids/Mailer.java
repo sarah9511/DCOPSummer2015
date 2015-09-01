@@ -12,10 +12,11 @@ import akka.actor.UntypedActor;
 import smartgrids.message.Ack;
 import smartgrids.message.InfoRequest;
 import smartgrids.message.InfoResponse;
+import smartgrids.message.KillMessage;
 import smartgrids.message.MonitorReport;
 import smartgrids.message.Pack;
-import smartgrids.message.ValueReport;
 import smartgrids.message.ReadyMessage;
+import smartgrids.message.ValueReport;
 
 public class Mailer extends UntypedActor 
 {
@@ -90,8 +91,10 @@ public class Mailer extends UntypedActor
 	{
 		if (message instanceof String)
 		{
+			String str = (String)message;
+			
 			// initial identification with neighbors (see sendIdentifyRequests())
-			if (((String)message).equals("identify"))
+			if (str.equals("identify"))
 			{
 				System.out.println("Agent " + agent.getId().getName() + " received " + (String)message);
 				
@@ -102,19 +105,9 @@ public class Mailer extends UntypedActor
 				sendIdentifyRequests();
 			}
 			// report to monitor
-			else if (((String)message).equals("report"))
+			else if (str.equals("report"))
 			{
-				//System.err.println("received report message from monitor");
-				ArrayList<Boolean> varsActive = new ArrayList<Boolean>();
-				for (Variable<?> v : agent.getVariables().values())
-				{
-					varsActive.add(v.set);
-				}
-				send(getSender(), new MonitorReport(agent.active(), varsActive));
-				//getSender().tell(new MonitorReport(agent.active(), varsActive), getSelf());
-			}
-			else if (((String)message).equals("cycleCheck")){
-				send( getSender() , new Boolean( agent.getCurrCycleComplete() ) );
+				getSender().tell(new MonitorReport(agent.active()), getSelf());
 			}
 		}
 		// received an ActorIdentity as response to our identify
@@ -127,7 +120,6 @@ public class Mailer extends UntypedActor
 				// send an InfoRequest so that we may find out who this agent is (we just need its name)
 				System.out.println(agent.getId().getName() + " received actor identity");
 				send(responder, new InfoRequest());
-				//responder.tell(new InfoRequest(), getSelf());
 			}
 		}
 		else if (message instanceof InfoRequest)
@@ -135,7 +127,6 @@ public class Mailer extends UntypedActor
 			// respond to InfoRequest with an InfoResponse (contains our name)
 			System.out.println(agent.getId().getName() + " received info request");
 			send(getSender(), new InfoResponse(agent.getId().getName()));
-			//getSender().tell(new InfoResponse(agent.getId().getName()), getSelf());
 		}
 		else if (message instanceof InfoResponse)
 		{
@@ -148,9 +139,15 @@ public class Mailer extends UntypedActor
 			ValueReport vr = (ValueReport)message;
 			agent.valueReport(vr.ownerName, vr.varName, vr.value);
 		}
-        else if (message instanceof ReadyMessage){
-            agent.receiveReadyMessage( (ReadyMessage)message );
+        else if (message instanceof ReadyMessage)
+        {
+            agent.receiveReadyMessage((ReadyMessage)message);
             System.err.println("Received ready message from neighbor");
+        }
+        else if (message instanceof KillMessage)
+        {
+        	System.out.println("agent done");
+        	agent.done();
         }
 		else
 		{

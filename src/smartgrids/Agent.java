@@ -4,36 +4,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import akka.actor.ActorRef;
-import smartgrids.message.ValueReport;
 import smartgrids.message.ReadyMessage;
-
-import java.lang.Thread;
+import smartgrids.message.ValueReport;
 
 public class Agent
 {
-	private static final int cycleThreshold = 20;
-	private int currentCycle;
-	private int currCycleStartTime;
-	private int betterCostThreshold = 10;
-	private int iterationsSinceBetterCost;
-	private boolean currCycleComplete;
+	private static final int iterationsThreshold = 20;
 
 	private Identifier id;
 	private HashMap<String, Variable<Integer>> variables = new HashMap<>();
 	private HashMap<String, Constraint> constraints = new HashMap<>();
 	private HashMap<String, Identifier> neighbors = new HashMap<>();
-    private HashMap<String, ReadyMessage> neighborsReady = new HashMap<>();
+	private ArrayList<String> neighborsReady = new ArrayList<>();
 	private Mailer mailer;
 	
-	private Boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
+	private boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
 	
-	private Timer cycleCheckTimer;
-	public boolean neighborReadyStatus;
-	//private String monitorPath = "akka.tcp://monitorSystem@127.0.0.1:2550/user/monitor";
+	private int currentCycle;
+	private int iterationsSinceBetterCost;
+	//private boolean currCycleComplete;
+	
+	private boolean done;
 	
 	
 	public Agent(Identifier id, HashMap<String, Variable<Integer>> variables, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors, Mailer mailer)
@@ -44,15 +36,10 @@ public class Agent
 		this.neighbors = neighbors;
 		this.mailer = mailer;
 		
-		
-		
 		active = true;
 		currentCycle = 0;
-		currCycleComplete = false;
 		iterationsSinceBetterCost = 0;
-		cycleCheckTimer = new Timer();
-		
-		
+		done = false;
 		
 		System.err.println("\nAgent " + id.getName() + " is alive\n");
 		
@@ -62,7 +49,7 @@ public class Agent
 		{
 			v.setOwner(id);
 			
-			System.err.print("    " + v.getName() + ": " + v.getValue() + ", " + v.getDomain().getName() + ": ");
+			System.err.print("	" + v.getName() + ": " + v.getValue() + ", " + v.getDomain().getName() + ": ");
 			for (Object value : v.getDomain().getValues())
 			{
 				System.err.print((int)value + " ");
@@ -70,7 +57,6 @@ public class Agent
 			System.err.println();
 		}
 		System.err.println();
-		//cycleCheckTimer.scheduleAtFixedRate( new CycleCheck(), 5000, 500  );  // move this functionality to valueReport
 	}
 	
 	
@@ -168,11 +154,12 @@ public class Agent
 		if (allVarsSet)
 		{
 			System.err.println("\nALL VARS SET\n");
+			
 			boolean betterFound = false;
+			
 			// determine a possible change in value for a variable
 			for (Variable<Integer> var : variables.values())
 			{
-				
 				// best possible cost of this variable
 				int bestCost = 0;
 				for (Constraint constraint : var.getConstraints())
@@ -202,47 +189,20 @@ public class Agent
 					// if this value is better, this is the best so far
 					if (currentCost < bestCost)
 					{
-						betterFound = true;
-						iterationsSinceBetterCost = 0;
-                        currCycleComplete = false;
+						//currCycleComplete = false;
 						bestCost = currentCost;
 						bestVal = domainValues.get(i);
 					} 
-					
-				}
-				
-				// increment cycle condition based on time since an improvement was found
-				if (!betterFound){ 
-                    iterationsSinceBetterCost++;
-                    System.err.println( "current number of iterations since last improvement: " + iterationsSinceBetterCost );
-                }		
-				
-				// what to do if this agent is ready to move to next cycle: notify all neighbors
-				if (iterationsSinceBetterCost >= cycleThreshold){
-                    currCycleComplete = true;
-                    //notify neighbors this agent is ready
-                    for (Identifier n : neighbors.values()){
-                        mailer.send( n.getActorRef() , new ReadyMessage( currCycleComplete, id.getName() ) );
-                        
-                    }
-                    
-                    //if all ready messages received, call sendVars, move on to next cycle, clear all ready messages
-                    if ( neighborsReady.size() == neighbors.size() ){
-                        System.err.println("ALL AGENTS READY FOR NEXT CYCLE");
-                        iterationsSinceBetterCost = 0;
-                        currentCycle++;
-                        neighborsReady.clear();
-                        sendVars();
-                        
-                    }
-                    
 				}
 				
 				// chance of changing value
-				if (Math.random() > 0.5)
+				if (bestVal != oldVal && Math.random() > 0.5)
 				{
 					System.err.println('\t' + var.getName() + " - " + oldVal + ", " + oldCost + " -> " + bestVal + ", " + bestCost);
 					var.setVal(bestVal);
+					
+					betterFound = true;
+					iterationsSinceBetterCost = 0;
 				}
 				else
 				{
@@ -263,13 +223,31 @@ public class Agent
 				}
 			}
 			
-			System.err.println();
+			// increment cycle condition based on time since an improvement was found
+			if (!betterFound)
+			{ 
+				iterationsSinceBetterCost++;
+			}
 			
-			// wait 2 seconds to make sure all agents' receive vals
-			long lastTime = System.currentTimeMillis();
-			while (System.currentTimeMillis() - lastTime < 2000);
+			System.err.println("\ncurrent number of iterations since last improvement: " + iterationsSinceBetterCost + '\n');
 			
-			sendVars();
+			// what to do if this agent is ready to move to next cycle: notify all neighbors
+			if (iterationsSinceBetterCost >= iterationsThreshold)
+			{
+				active = false;
+			}
+			
+			if (!done)
+			{
+				long lastTime = System.currentTimeMillis();
+				while (System.currentTimeMillis() - lastTime < 1000);
+				
+				//notify neighbors this agent is ready
+				for (Identifier n : neighbors.values())
+				{
+					mailer.send(n.getActorRef(), new ReadyMessage(id.getName()));
+				}
+			}
 		}
 	}
 	
@@ -305,7 +283,6 @@ public class Agent
 					if (!sentVars.contains(varKey))
 					{
 						mailer.send(ownerRef, new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()));
-						//ownerRef.tell(new ValueReport(id.getName(), ourVar.getName(), ourVar.getValue()), self);
 						ourVar.reset();
 						
 						sentVars.add(varKey);
@@ -313,6 +290,27 @@ public class Agent
 				}
 			}
 		}
+	}
+	
+	
+	public void receiveReadyMessage(ReadyMessage rm)
+	{
+		neighborsReady.add(rm.agentName);
+		
+		//if all ready messages received, call sendVars, move on to next cycle, clear all ready messages
+		if (neighborsReady.size() == neighbors.size())
+		{
+			System.err.println("ALL AGENTS READY FOR NEXT CYCLE");
+			currentCycle++;
+			neighborsReady.clear();
+			sendVars();
+		}
+	}
+	
+	
+	public void done()
+	{
+		done = true;
 	}
 	
 	
@@ -336,41 +334,8 @@ public class Agent
 		return active;
 	}
 	
-	public boolean getCurrCycleComplete(){
-		return currCycleComplete;
+	public int getCurrentCycle()
+	{
+		return currentCycle;
 	}
-	
-	public void receiveReadyMessage( ReadyMessage rm ){
-        neighborsReady.put( rm.getName(), rm );
-    }
-	
-	
-	class CycleCheck extends TimerTask{
-		
-		@Override
-		public void run(){
-			System.err.println("in cycle check; number of iterations:" + iterationsSinceBetterCost  + "\n");
-
-			if ( iterationsSinceBetterCost > betterCostThreshold ){
-				currCycleComplete = true;								//pre-ready state
-				System.err.println(" current cycle complete ");
-			}
-			boolean terminate = true;
-			for ( Identifier n : neighbors.values() ){
-				mailer.send( n.getActorRef(), "cycleCheck" );
-				if (!neighborReadyStatus){
-					terminate = false;
-					break;
-				}
-			}
-			if(terminate && currCycleComplete){
-				//have all agents agree,
-				//commit seppuku
-			}
-			
-		}
-		
-	}
-	
-	
 }

@@ -1,6 +1,5 @@
 package smartgrids;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,35 +10,19 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import smartgrids.message.KillMessage;
 import smartgrids.message.MonitorReport;
 
 
 public class AgentMonitor extends UntypedActor
 {
 	private Timer checkAgentTimer;
-	private ArrayList<ActorRef> allAgents;
-	private ArrayList<Boolean> toTerminate;
-	
-	private boolean killAll;
-	
-	private HashMap<ActorRef, Boolean> agentTermination; //change to use this map once it is working
-	private HashMap<ActorRef, Integer> reportCounts;
-	
-	private int reportThreshold;
+	private HashMap<ActorRef, Boolean> agents = new HashMap<>();
 	
 	
-	public AgentMonitor(int thresh)
+	public AgentMonitor()
 	{
 		checkAgentTimer = new Timer();
-		allAgents = new ArrayList<ActorRef>();
-		toTerminate = new ArrayList<Boolean>();
-		killAll = false;
-		
-		reportThreshold = thresh;
-		
-		agentTermination = new HashMap<ActorRef, Boolean>();
-		reportCounts = new HashMap<ActorRef, Integer>();
-		
 		checkAgentTimer.scheduleAtFixedRate(new checkTask(), 1000, 1000);
 		
 		System.err.println("AgentMonitor created");
@@ -53,29 +36,43 @@ public class AgentMonitor extends UntypedActor
 		{
 			System.out.println("Monitor received new reference");
 			
-			getContext().watch((ActorRef)message);
-			agentTermination.put((ActorRef)message, false);
-			reportCounts.put((ActorRef)message, 0);
+			agents.put((ActorRef)message, false);
 		}
 		else if (message instanceof MonitorReport)
 		{
 			MonitorReport mr = (MonitorReport)message;
-			reportCounts.put(getSender(), reportCounts.get(getSender()) + 1);  //increase report count for this agent
-			System.err.println("\treceived a MonitorReport\n\t\treadyToTerminate: " + agentTermination.get(getSender()) + "\n");
+			System.err.println("\treceived a MonitorReport");
 			
-			if ((!mr.active) || reportCounts.get(getSender()) > reportThreshold)
+			if (!mr.active)
 			{
-				//TODO: not tested yet because termination conditions not implemented
-				agentTermination.put(getSender(), true);
+				System.out.println("\nagent not active\n");
+				
+				agents.put(getSender(), true);
+				
+				boolean killAll = true;
+				
+				for (Boolean kill : agents.values())
+				{
+					if (!kill)
+					{
+						killAll = false;
+						break;
+					}
+				}
+				
+				if (killAll)
+				{
+					for (ActorRef agent : agents.keySet())
+					{
+						agent.tell(new KillMessage(), null);
+					}
+					
+					checkAgentTimer.cancel();
+				}
 			}
 		}
 	}
 	
-	public static void main(String args[])
-	{
-		final ActorSystem monitorSystem = ActorSystem.create("monitorSystem", ConfigFactory.load("config/monitor"));
-		monitorSystem.actorOf(Props.create(AgentMonitor.class,  20  ), "monitor");
-	}
 	
 	private class checkTask extends TimerTask
 	{
@@ -84,31 +81,17 @@ public class AgentMonitor extends UntypedActor
 		{
 			System.err.println("check task running");
 			
-			for (ActorRef sendTo : agentTermination.keySet())
+			for (ActorRef sendTo : agents.keySet())
 			{
-				sendTo.tell("report", getSelf());
+				if (!agents.get(sendTo)) sendTo.tell("report", getSelf());
 			}
-			
-			killAll = true;
-			
-			for (Boolean b : agentTermination.values())
-			{
-				if (b == false)
-				{
-					killAll = false;
-					break;
-				}
-			}
-			
-			// System.err.println("killAll: " + killAll);
-			// if(killAll)
-			// {
-				// for(ActorRef deadLikeDisco : agentTermination.keySet())
-				// {
-					// getContext().unwatch(deadLikeDisco);
-					// getContext().stop(deadLikeDisco);
-				// } 
-			// }
 		}
+	}
+	
+	
+	public static void main(String args[])
+	{
+		final ActorSystem monitorSystem = ActorSystem.create("monitorSystem", ConfigFactory.load("config/monitor"));
+		monitorSystem.actorOf(Props.create(AgentMonitor.class), "monitor");
 	}
 }
