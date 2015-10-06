@@ -107,7 +107,7 @@ public class Mailer extends UntypedActor
 			// report to monitor
 			else if (str.equals("report"))
 			{
-				getSender().tell(new MonitorReport(agent.active()), getSelf());
+				getSender().tell(new MonitorReport(agent.active(), agent.getTotalMem(), agent.getFreeMem() ), getSelf()); //TODO: add params for memory
 			}
 		}
 		// received an ActorIdentity as response to our identify

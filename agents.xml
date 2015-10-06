@@ -49,6 +49,17 @@
 	</variables>
 </agent>
 
+<agent>
+	<id name="agt4" ip="127.0.0.1" port="2555" />
+	<domains nbDomains="1">
+		<domain name="dom1" nbValues="7" datatype="int">-2..4</domain>
+	</domains>
+	
+	<variables nbVariables="1">
+		<variable name="var1" domain="dom1" />
+	</variables>
+</agent>
+
 
 <relations nbRelations="4">
 	<relation name="rel1" arity="2" defaultCost="infinity" nbTuples="11" semantics="soft">
@@ -70,6 +81,7 @@
 	<constraint name="con2" arity="2" scope="agt1:var2 agt2:var3" reference="rel2"/>
 	<constraint name="con3" arity="3" scope="agt2:var2 agt3:var1 agt3:var2" reference="rel3"/>
 	<constraint name="con4" arity="4" scope="agt2:var2 agt2:var3 agt3:var1 agt3:var3" reference="rel4"/>
+    <constraint name="con5" arity="2" scope="agt3:var1 agt4:var1" reference="rel2" />
 </constraints>
 
 </agents>

@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <agent>
-	<id name="agt3" ip="127.0.0.1" port="2554" />
-	
-	<domains nbDomains="2">
+	<id name="agt4" ip="127.0.0.1" port="2555" />
+	<domains nbDomains="1">
 		<domain name="dom1" nbValues="7" datatype="int">-2..4</domain>
-		<domain name="dom2" nbValues="2" datatype="int">1..2</domain>
 	</domains>
 	
-	<variables nbVariables="4">
+	<variables nbVariables="1">
 		<variable name="var1" domain="dom1" />
-		<variable name="var2" domain="dom1" />
-		<variable name="var3" domain="dom2" />
-		<variable name="var4" domain="dom2" />
 	</variables>
 
 	<relations nbRelations="4">
@@ -31,13 +26,10 @@
 	</relations>
 
 	<constraints nbConstraints="4">
-		<constraint name="con3" arity="3" scope="agt2:var2 var1 var2" reference="rel3"/>
-		<constraint name="con4" arity="4" scope="agt2:var2 agt2:var3 var1 var3" reference="rel4"/>
-	    <constraint name="con5" arity="2" scope="var1 agt4:var1" reference="rel2" />
+	    <constraint name="con5" arity="2" scope="agt3:var1 var1" reference="rel2" />
 	</constraints>
 
-	<neighbors nbNeighbors="2">
-		<neighbor name="agt2" ip="127.0.0.1" port="2553" />
-		<neighbor name="agt4" ip="127.0.0.1" port="2555" />
+	<neighbors nbNeighbors="1">
+		<neighbor name="agt3" ip="127.0.0.1" port="2554" />
 	</neighbors>
 </agent>

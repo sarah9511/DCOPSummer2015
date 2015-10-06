@@ -10,6 +10,7 @@ import smartgrids.message.ValueReport;
 
 public class Agent
 {
+	Runtime runtime = Runtime.getRuntime();
 	private static final int iterationsThreshold = 20;
 
 	private Identifier id;
@@ -333,6 +334,16 @@ public class Agent
 	{
 		return active;
 	}
+	
+	//TODO add functions to get memory usage
+	public long getTotalMem(){
+		return runtime.totalMemory() / 1000000; //get in megabytes
+	}
+	
+	public long getFreeMem(){
+		return runtime.freeMemory() / 1000000; //get in megabytes
+	}
+	
 	
 	public int getCurrentCycle()
 	{
