@@ -1,0 +1,257 @@
+AgentMonitor created
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+check task running
+check task running
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+check task running
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	8/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+check task running
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	5/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	6/9 megabytes used
+check task running
+	received a MonitorReport
+	memory usage: 
+	7/9 megabytes used
