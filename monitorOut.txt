@@ -2,11 +2,3 @@ AgentMonitor created
 check task running
 check task running
 check task running
-check task running
-check task running
-check task running
-check task running
-check task running
-check task running
-check task running
-check task running

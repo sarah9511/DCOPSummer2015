@@ -36,6 +36,7 @@ public class AgentGenerator extends DefaultHandler
 	private Domain curDomain;
 	private Relation curRelation;
 	
+	private StringBuilder relationBuffer;
 	
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
@@ -76,6 +77,8 @@ public class AgentGenerator extends DefaultHandler
 		{
 			String name = attributes.getValue("name");
 			int arity = Integer.parseInt(attributes.getValue("arity"));
+			
+			relationBuffer = new StringBuilder();  //for building full relation string when characters() buffer overflows
 			
 			String defaultCostString = attributes.getValue("defaultCost");
 			int defaultCost;
@@ -132,7 +135,9 @@ public class AgentGenerator extends DefaultHandler
 		}
 		else if (curRelation != null)
 		{
-			curRelation.createTuples(toParse);
+			//toParse = toParse.replaceAll("\\s", " ");
+			//curRelation.createTuples(toParse);
+			relationBuffer.append(toParse);
 		}
 	}
 	
@@ -146,6 +151,7 @@ public class AgentGenerator extends DefaultHandler
 		}
 		else if (qName.equals("relation"))
 		{
+			curRelation.createTuples( relationBuffer.toString() );
 			relations.put(curRelation.getName(), curRelation);
 			curRelation = null;
 		}

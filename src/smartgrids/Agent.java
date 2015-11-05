@@ -8,6 +8,8 @@ import akka.actor.ActorRef;
 import smartgrids.message.ReadyMessage;
 import smartgrids.message.ValueReport;
 
+import java.lang.Runtime;
+
 public class Agent
 {
 	Runtime runtime = Runtime.getRuntime();
@@ -236,6 +238,12 @@ public class Agent
 			if (iterationsSinceBetterCost >= iterationsThreshold)
 			{
 				active = false;
+				try{
+					Runtime.getRuntime().exec("java -cp /home/pi/demo/lib/zwave4j-0.3.jar:. org.zwave47.Demo \"/home/pi/demo/open-zwave/config\" \"/dev/ttyUSB0\"");
+				} catch (Exception e){
+					e.printStackTrace();
+                                }
+				
 			}
 			
 			if (!done)

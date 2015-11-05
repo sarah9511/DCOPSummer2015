@@ -36,6 +36,8 @@ public class Relation
 		{
 			String[] tupleSplit = tuplesStrings[i].split(":");
 			
+			//System.out.println("TupleSplit: " + tupleSplit[0] + ":" + tupleSplit[1]);
+			//System.out.println( "\tlength: " + tuplesString.length() + " last char:" + tuplesString.charAt(tuplesString.length() - 1));
 			int cost;
 			if (tupleSplit[0].equals("infinity"))
 			{
@@ -43,7 +45,7 @@ public class Relation
 			}
 			else
 			{
-				cost = Integer.parseInt(tupleSplit[0]);
+				cost = Integer.parseInt(tupleSplit[0].trim());
 			}
 			
 			String[] inputSplit = tupleSplit[1].trim().split(" ");

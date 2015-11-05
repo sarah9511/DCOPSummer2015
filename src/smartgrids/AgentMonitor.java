@@ -42,7 +42,7 @@ public class AgentMonitor extends UntypedActor
 		{
 			MonitorReport mr = (MonitorReport)message;
 			System.err.println("\treceived a MonitorReport");
-			System.err.println("\tmemory usage: \n\t" + mr.memoryInUse + "/" + mr.totalAgentMemory + " megabytes used");
+			System.err.println("\tmemory usage: \n\t" + mr.memoryInUse + "/" + mr.totalAgentMemory + " megabytes in use");
 			if (!mr.active)
 			{
 				System.out.println("\nagent not active\n");

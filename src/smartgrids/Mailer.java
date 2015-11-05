@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.io.*;
 
 import akka.actor.ActorIdentity;
 import akka.actor.ActorRef;
@@ -28,11 +29,14 @@ public class Mailer extends UntypedActor
 	private HashMap<Integer, Timer> acks = new HashMap<>();
 	
 	private int curID;
+	BufferedWriter logWriter;
+	File log;
 	
-	
-	public Mailer(Identifier id, HashMap<String, Variable<Integer>> variables, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors)
+	public Mailer(Identifier id, HashMap<String, Variable<Integer>> variables, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors) throws IOException
 	{
 		agent = new Agent(id, variables, constraints, neighbors, this);
+		log = new File("log.txt");
+		logWriter = new BufferedWriter(new FileWriter(log));
 	}
 	
 	
@@ -108,6 +112,13 @@ public class Mailer extends UntypedActor
 			else if (str.equals("report"))
 			{
 				getSender().tell(new MonitorReport(agent.active(), agent.getTotalMem(), agent.getFreeMem() ), getSelf()); //TODO: add params for memory
+				try{
+					logWriter.write((agent.getTotalMem()-agent.getFreeMem()) + "\n");
+					logWriter.flush();
+				} catch (IOException e){
+					System.err.println(e.getMessage());
+					e.printStackTrace();
+				}
 			}
 		}
 		// received an ActorIdentity as response to our identify
