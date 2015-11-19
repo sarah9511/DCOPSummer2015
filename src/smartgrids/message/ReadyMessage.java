@@ -2,7 +2,6 @@ package smartgrids.message;
 
 import java.io.Serializable;
 
-
 @SuppressWarnings("serial")
 public class ReadyMessage implements Serializable
 {
@@ -14,3 +13,4 @@ public class ReadyMessage implements Serializable
 		this.agentName = agentName;
 	}
 }
+
