@@ -1,2 +1,6 @@
 classes/
 /bin/
+OZW_Log.txt
+devices.csv
+make2.bat
+*.xml

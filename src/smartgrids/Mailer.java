@@ -24,6 +24,8 @@ public class Mailer extends UntypedActor
 	
 	private Agent agent;
 	
+	private ActorRef monitor;
+	
 	private HashMap<ActorRef, ArrayList<Integer>> messageIDs = new HashMap<>();
 	private HashMap<Integer, Timer> acks = new HashMap<>();
 	
@@ -82,7 +84,7 @@ public class Mailer extends UntypedActor
 		
 		receiver.tell(new Pack(curID, message), getSelf());
 		
-		timer.schedule(new AckTask(receiver, message, curID), 1000);
+		timer.schedule(new AckTask(receiver, message, curID, 0), 1000);
 		
 		curID++;
 	}
@@ -107,6 +109,8 @@ public class Mailer extends UntypedActor
 			// report to monitor
 			else if (str.equals("report"))
 			{
+				if (monitor == null) monitor = getSender();
+				
 				getSender().tell(new MonitorReport(agent.active()), getSelf());
 			}
 		}
@@ -119,7 +123,7 @@ public class Mailer extends UntypedActor
 			{
 				// send an InfoRequest so that we may find out who this agent is (we just need its name)
 				System.out.println(agent.getId().getName() + " received actor identity");
-				send(responder, new InfoRequest());
+				send(responder, new InfoRequest(agent.getId().getName()));
 			}
 		}
 		else if (message instanceof InfoRequest)
@@ -127,6 +131,7 @@ public class Mailer extends UntypedActor
 			// respond to InfoRequest with an InfoResponse (contains our name)
 			System.out.println(agent.getId().getName() + " received info request");
 			send(getSender(), new InfoResponse(agent.getId().getName()));
+			agent.neighborAlive(((InfoRequest)message).agentName, getSender());
 		}
 		else if (message instanceof InfoResponse)
 		{
@@ -142,7 +147,6 @@ public class Mailer extends UntypedActor
         else if (message instanceof ReadyMessage)
         {
             agent.receiveReadyMessage((ReadyMessage)message);
-            System.err.println("Received ready message from neighbor");
         }
         else if (message instanceof KillMessage)
         {
@@ -180,32 +184,49 @@ public class Mailer extends UntypedActor
 	}
 	
 	
+	public ActorRef getMonitor()
+	{
+		return monitor;
+	}
+	
+	
 	private class AckTask extends TimerTask
 	{
 		private ActorRef receiver;
 		private Object message;
 		private int id;
+		private int count;
 		
 		
-		public AckTask(ActorRef receiver, Object message, int id)
+		public AckTask(ActorRef receiver, Object message, int id, int count)
 		{
 			this.receiver = receiver;
 			this.message = message;
 			this.id = id;
+			this.count = count;
 		}
 		
 		
 		@Override
 		public void run()
 		{
-			if (acks.containsKey(id))
+			System.out.println("\ttimer " + count);
+			
+			if (count >= 5)
+			{
+				System.out.println(message);
+				acks.remove(id);
+				cancel();
+				agent.neighborDead(receiver);
+			}
+			else if (acks.containsKey(id))
 			{
 				receiver.tell(new Pack(id, message), getSelf());
 				
 				acks.get(id).cancel();
 				
 				Timer timer = new Timer();
-				timer.schedule(new AckTask(receiver, message, id), 1000);
+				timer.schedule(new AckTask(receiver, message, id, count + 1), 1000);
 				acks.put(id, timer);
 			}
 		}

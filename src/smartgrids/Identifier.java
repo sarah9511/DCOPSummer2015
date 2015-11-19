@@ -1,8 +1,8 @@
 package smartgrids;
 
-import akka.actor.ActorRef;
-
 import java.io.Serializable;
+
+import akka.actor.ActorRef;
 
 @SuppressWarnings("serial")
 public class Identifier implements Serializable
@@ -14,12 +14,23 @@ public class Identifier implements Serializable
 	private ActorRef actorRef;
 	private boolean refSet = false;
 	
+	public boolean alive;
+	
 	
 	public Identifier(String name, String ip, int port)
 	{
 		this.name = name;
 		this.ip = ip;
 		this.port = port;
+		
+		alive = true;
+	}
+	
+	
+	public void removeActorRef()
+	{
+		actorRef = null;
+		refSet = false;
 	}
 	
 	

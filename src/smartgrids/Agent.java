@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import akka.actor.ActorRef;
+import smartgrids.message.AgentDeadMessage;
 import smartgrids.message.ReadyMessage;
 import smartgrids.message.ValueReport;
 
@@ -13,19 +14,25 @@ public class Agent
 	private static final int iterationsThreshold = 20;
 
 	private Identifier id;
+	
 	private HashMap<String, Variable<Integer>> variables = new HashMap<>();
 	private HashMap<String, Constraint> constraints = new HashMap<>();
+	
+	private HashMap<ActorRef, String> neighborNames = new HashMap<>();
 	private HashMap<String, Identifier> neighbors = new HashMap<>();
+	
 	private ArrayList<String> neighborsReady = new ArrayList<>();
+	
 	private Mailer mailer;
 	
-	private boolean active;   // will be used to monitor termination conditions, determine when monitor should stop agents 
+	private boolean active;
 	
 	private int currentCycle;
 	private int iterationsSinceBetterCost;
-	//private boolean currCycleComplete;
 	
 	private boolean done;
+	
+	private int neighborsAlive;
 	
 	
 	public Agent(Identifier id, HashMap<String, Variable<Integer>> variables, HashMap<String, Constraint> constraints, HashMap<String, Identifier> neighbors, Mailer mailer)
@@ -67,6 +74,8 @@ public class Agent
 	{
 		// set ActorRef for corresponding neighbor
 		neighbors.get(name).setActorRef(sender);
+		neighborNames.put(sender, name);
+		neighborsAlive++;
 		
 		System.err.println(id.getName() + " received a response from " + name + "!");
 		
@@ -86,6 +95,8 @@ public class Agent
 		// if neighbors filled out, set up constraints' variables (see Constraint.setupVars())
 		if (filledOut)
 		{
+			System.out.println("NEIGHBORS ALIVE: " + neighborsAlive);
+			
 			// set up actual variable objects in constraint
 			for (Constraint constraint : constraints.values())
 			{
@@ -132,15 +143,14 @@ public class Agent
 			System.err.println();
 		}
 		
-		// flag is set if all neighbors' variables are set
-		boolean allVarsSet = true;
-		
 		// check if all variables have come in for this iteration
+		boolean allVarsSet = true;	// flag is set if all neighbors' variables are set
+		
 		for (Constraint c : constraints.values())
 		{
 			for (Variable<?> var : c.getTheirVars().values())
 			{
-				if (!var.set)
+				if (!var.set && neighbors.get(var.getOwner().getName()).alive)//neighborAlive.get(var.getOwner().getName()))
 				{
 					allVarsSet = false;
 					break;
@@ -154,99 +164,104 @@ public class Agent
 		if (allVarsSet)
 		{
 			System.err.println("\nALL VARS SET\n");
-			
-			boolean betterFound = false;
-			
-			// determine a possible change in value for a variable
-			for (Variable<Integer> var : variables.values())
+			algorithmStep();
+		}
+	}
+	
+	
+	public void algorithmStep()
+	{
+		boolean betterFound = false;
+		
+		// determine a possible change in value for a variable
+		for (Variable<Integer> var : variables.values())
+		{
+			// best possible cost of this variable
+			int bestCost = 0;
+			for (Constraint constraint : var.getConstraints())
 			{
-				// best possible cost of this variable
-				int bestCost = 0;
+				bestCost += constraint.calcCost();
+			}
+			int oldCost = bestCost;
+			
+			// best possible value for this variable
+			int bestVal = var.getValue();
+			int oldVal = bestVal;
+			
+			ArrayList<Integer> domainValues = var.getDomain().getValues();
+			
+			// test each value in variable's domain
+			for (int i = 0; i < domainValues.size(); i++)
+			{
+				var.setVal(domainValues.get(i));
+				
+				// cost for this variable value
+				int currentCost = 0;
 				for (Constraint constraint : var.getConstraints())
 				{
-					bestCost += constraint.calcCost();
+					currentCost += constraint.calcCost();
 				}
-				int oldCost = bestCost;
 				
-				// best possible value for this variable
-				int bestVal = var.getValue();
-				int oldVal = bestVal;
-				
-				ArrayList<Integer> domainValues = var.getDomain().getValues();
-				
-				// test each value in variable's domain
-				for (int i = 0; i < domainValues.size(); i++)
+				// if this value is better, this is the best so far
+				if (currentCost < bestCost)
 				{
-					var.setVal(domainValues.get(i));
-					
-					// cost for this variable value
-					int currentCost = 0;
-					for (Constraint constraint : var.getConstraints())
-					{
-						currentCost += constraint.calcCost();
-					}
-					
-					// if this value is better, this is the best so far
-					if (currentCost < bestCost)
-					{
-						//currCycleComplete = false;
-						bestCost = currentCost;
-						bestVal = domainValues.get(i);
-					} 
-				}
-				
-				// chance of changing value
-				if (bestVal != oldVal && Math.random() > 0.5)
-				{
-					System.err.println('\t' + var.getName() + " - " + oldVal + ", " + oldCost + " -> " + bestVal + ", " + bestCost);
-					var.setVal(bestVal);
-					
-					betterFound = true;
-					iterationsSinceBetterCost = 0;
-				}
-				else
-				{
-					var.setVal(oldVal);
-				}
+					//currCycleComplete = false;
+					bestCost = currentCost;
+					bestVal = domainValues.get(i);
+				} 
 			}
 			
-			System.err.println();
-			
-			// unset vars for next iteration
-			for (Constraint c : constraints.values())
+			// chance of changing value
+			if (bestVal != oldVal && Math.random() > 0.5)
 			{
-				System.err.println('\t' + c.getName() + " cost: " + c.calcCost());
+				System.err.println('\t' + var.getName() + " - " + oldVal + ", " + oldCost + " -> " + bestVal + ", " + bestCost);
+				var.setVal(bestVal);
 				
-				for (Variable<?> var : c.getTheirVars().values())
-				{
-					var.set = false;
-				}
+				betterFound = true;
+				iterationsSinceBetterCost = 0;
 			}
-			
-			// increment cycle condition based on time since an improvement was found
-			if (!betterFound)
-			{ 
-				iterationsSinceBetterCost++;
-			}
-			
-			System.err.println("\ncurrent number of iterations since last improvement: " + iterationsSinceBetterCost + '\n');
-			
-			// what to do if this agent is ready to move to next cycle: notify all neighbors
-			if (iterationsSinceBetterCost >= iterationsThreshold)
+			else
 			{
-				active = false;
+				var.setVal(oldVal);
 			}
+		}
+		
+		System.err.println();
+		
+		// unset vars for next iteration
+		for (Constraint c : constraints.values())
+		{
+			System.err.println('\t' + c.getName() + " cost: " + c.calcCost());
 			
-			if (!done)
+			for (Variable<?> var : c.getTheirVars().values())
 			{
-				long lastTime = System.currentTimeMillis();
-				while (System.currentTimeMillis() - lastTime < 1000);
-				
-				//notify neighbors this agent is ready
-				for (Identifier n : neighbors.values())
-				{
-					mailer.send(n.getActorRef(), new ReadyMessage(id.getName()));
-				}
+				var.set = false;
+			}
+		}
+		
+		// increment cycle condition based on time since an improvement was found
+		if (!betterFound)
+		{ 
+			iterationsSinceBetterCost++;
+		}
+		
+		System.err.println("\ncurrent number of iterations since last improvement: " + iterationsSinceBetterCost + '\n');
+		
+		// what to do if this agent is ready to move to next cycle: notify all neighbors
+		if (iterationsSinceBetterCost >= iterationsThreshold)
+		{
+			active = false;
+		}
+		
+		if (!done)
+		{
+			long lastTime = System.currentTimeMillis();
+			while (System.currentTimeMillis() - lastTime < 1000);
+			
+			//notify neighbors this agent is ready
+			for (Identifier n : neighbors.values())
+			{
+				if (neighbors.get(n.getName()).alive) mailer.send(n.getActorRef(), new ReadyMessage(id.getName()));
 			}
 		}
 	}
@@ -272,6 +287,12 @@ public class Agent
 			for (Variable<Integer> theirVar : theirVars)
 			{
 				String ownerName = theirVar.getOwner().getName();
+				
+				if (!neighbors.get(ownerName).alive)
+				{
+					continue;
+				}
+				
 				ActorRef ownerRef = theirVar.getOwner().getActorRef();
 				
 				// send each of ourVars in this constraint to our neighbor (the owner of theirVar)
@@ -295,10 +316,14 @@ public class Agent
 	
 	public void receiveReadyMessage(ReadyMessage rm)
 	{
+		System.err.println("Received ready message from neighbor");
+		
 		neighborsReady.add(rm.agentName);
 		
+		System.out.println(neighborsReady.size());
+		
 		//if all ready messages received, call sendVars, move on to next cycle, clear all ready messages
-		if (neighborsReady.size() == neighbors.size())
+		if (neighborsReady.size() >= neighborsAlive)
 		{
 			System.err.println("ALL AGENTS READY FOR NEXT CYCLE");
 			currentCycle++;
@@ -311,6 +336,72 @@ public class Agent
 	public void done()
 	{
 		done = true;
+	}
+	
+	
+	public void neighborDead(ActorRef deadNeighbor)
+	{
+		neighbors.get(neighborNames.get(deadNeighbor)).alive = false;
+		neighbors.get(neighborNames.get(deadNeighbor)).removeActorRef();
+		System.out.println("neighbor dead: " + neighborNames.get(deadNeighbor));
+		
+		neighborNames.remove(deadNeighbor);
+		
+		mailer.getMonitor().tell(new AgentDeadMessage(deadNeighbor), null);
+		
+		neighborsAlive--;
+		System.out.println("NEIGHBORS ALIVE: " + neighborsAlive);
+		
+		sendVars();
+		
+		// check if all variables have come in for this iteration
+		for (Constraint c : constraints.values())
+		{
+			for (Variable<?> var : c.getTheirVars().values())
+			{
+				if (!var.set && neighbors.get(var.getOwner().getName()).alive)
+				{
+					return;
+				}
+			}
+		}
+		
+		System.out.println("algo step");
+		
+		// all vars are set, change vars to improve costs
+		algorithmStep();
+	}
+	
+	public void neighborAlive(String agentName, ActorRef aliveNeighbor)
+	{
+		if (neighbors.get(agentName).alive) return;
+		
+		neighbors.get(agentName).setActorRef(aliveNeighbor);
+		
+		neighborNames.put(aliveNeighbor, agentName);
+		
+		neighbors.get(agentName).alive = true;
+		System.out.println("neighbor alive: " + agentName);
+		
+		neighborsAlive++;
+		System.out.println("NEIGHBORS ALIVE: " + neighborsAlive);
+		
+		for (Constraint c : constraints.values())
+		{
+			for (Variable<?> var : c.getTheirVars().values())
+			{
+				var.set = false;
+			}
+		}
+		
+		neighborsReady.clear();
+		
+		for (Identifier n : neighbors.values())
+		{
+			if (neighbors.get(n.getName()).alive) mailer.send(n.getActorRef(), new ReadyMessage(id.getName()));
+		}
+		
+		sendVars();
 	}
 	
 	

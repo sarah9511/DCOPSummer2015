@@ -10,14 +10,18 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import smartgrids.message.AgentDeadMessage;
 import smartgrids.message.KillMessage;
 import smartgrids.message.MonitorReport;
+import zwapi.ZWController;
 
 
 public class AgentMonitor extends UntypedActor
 {
 	private Timer checkAgentTimer;
 	private HashMap<ActorRef, Boolean> agents = new HashMap<>();
+	
+	private ZWController controller;
 	
 	
 	public AgentMonitor()
@@ -26,6 +30,8 @@ public class AgentMonitor extends UntypedActor
 		checkAgentTimer.scheduleAtFixedRate(new checkTask(), 1000, 1000);
 		
 		System.err.println("AgentMonitor created");
+		
+		controller = new ZWController("C:/Programming/Java/ZWaveAPI/config", "//./COM3");
 	}
 	
 	
@@ -68,8 +74,36 @@ public class AgentMonitor extends UntypedActor
 					}
 					
 					checkAgentTimer.cancel();
+					
+					controller.allOn();
+					
+					try
+					{
+						Thread.sleep(2000);
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+					
+					controller.allOff();
+					
+					try
+					{
+						Thread.sleep(500);
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+					
+					//controller.destroy();
 				}
 			}
+		}
+		else if (message instanceof AgentDeadMessage)
+		{
+			agents.put(((AgentDeadMessage)message).agent, true);
 		}
 	}
 	

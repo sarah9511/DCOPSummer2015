@@ -10,11 +10,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.typesafe.config.ConfigFactory;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-
-import com.typesafe.config.ConfigFactory;
 
 
 @SuppressWarnings({"rawtypes", "unchecked"})
