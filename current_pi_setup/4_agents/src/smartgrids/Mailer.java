@@ -21,7 +21,7 @@ import smartgrids.message.ValueReport;
 
 public class Mailer extends UntypedActor 
 {
-	private final String monitorPath = "akka.tcp://monitorSystem@169.254.123.40:2550/user/monitor";
+	private final String monitorPath = "akka.tcp://monitorSystem@172.24.18.96:2550/user/monitor";
 	
 	private Agent agent;
 	

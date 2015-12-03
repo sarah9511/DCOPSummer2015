@@ -47,8 +47,20 @@ for index in range(0, int(numAgents)): #for each agent file separately
 		temp = "<agent name=\"a_" + str(index) + "\"/>"
 		aname = "a_" + str(index)
 		
+		myIP = ""
+		if (aname == "a_0"):
+			myIP = "172.24.45.110"
+		elif(aname == "a_1"):
+			myIP = "172.24.89.230"
+		elif(aname == "a_2"):
+			myIP = "172.24.36.25"
+		elif(aname == "a_3"):
+			myIP = "172.24.6.110"
+		else:
+			myIP = "127.0.0.1"
+		
 		if temp in line:
-			agentFileStrings[index] =	agentFileStrings[index] + "\t<id name=\"a_" + str(index) + "\" ip=\"127.0.0.1\" port=\"" + str(port) + "\" />\n"
+			agentFileStrings[index] =	agentFileStrings[index] + "\t<id name=\"a_" + str(index) + "\" ip=\"" + myIP + "\" port=\"" + str(port) + "\" />\n"
 		
 		#parsing the domain section
 		 
@@ -234,7 +246,20 @@ for index in range(0, int(numAgents)): #for each agent file separately
 	for neigh in range(0, neighborCount):
 		#make a new neighbor line
 		ip = 2552 + int(neighborNames[neigh][neighborNames[neigh].find("_") + 1]) #getting the ip
-		neighborSection = neighborSection +  "\t\t<neighbor name=\"" + neighborNames[neigh] + "\" ip=\"127.0.0.1\" port=\"" + str(ip) +"\" />\n"
+		#assign address based on string in neighbor[neigh]
+		address = "YOU DUN GOOF'D"
+		if (neighborNames[neigh] == "a_0"):
+			address = "172.24.45.110"
+		elif(neighborNames[neigh] == "a_1"):
+			address = "172.24.89.230"
+		elif(neighborNames[neigh] == "a_2"):
+			address = "172.24.36.25"
+		elif(neighborNames[neigh] == "a_3"):
+			address = "172.24.6.110"
+		else:
+			address = "127.0.0.1"
+		
+		neighborSection = neighborSection +  "\t\t<neighbor name=\"" + neighborNames[neigh] + "\" ip=\"" + address + "\" port=\"" + str(ip) +"\" />\n"
 	neighborSection = neighborSection + "\t</neighbors>\n"
 	cSection = "\t<constraints nbConstraints =\"" + str(nbCons) + "\">\n" + cSection + "\t</constraints>\n"	
 	print("got out of big loop")

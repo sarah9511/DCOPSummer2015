@@ -234,7 +234,20 @@ for index in range(0, int(numAgents)): #for each agent file separately
 	for neigh in range(0, neighborCount):
 		#make a new neighbor line
 		ip = 2552 + int(neighborNames[neigh][neighborNames[neigh].find("_") + 1]) #getting the ip
-		neighborSection = neighborSection +  "\t\t<neighbor name=\"" + neighborNames[neigh] + "\" ip=\"127.0.0.1\" port=\"" + str(ip) +"\" />\n"
+		#assign address based on string in neighbor[neigh]
+		address = "YOU DUN GOOF'D"
+		if (neighbor[neigh] == "a_0"):
+			address = "172.24.45.110"
+		elif(neighbor[neigh] == "a_1"):
+			address = "172.24.89.230"
+		elif(neighbor[neigh] == "a_2"):
+			address = "172.24.36.25"
+		elif(neighbor[neigh] == "a_3"):
+			address = "172.24.6.110"
+		else:
+			address = "127.0.0.1"
+		
+		neighborSection = neighborSection +  "\t\t<neighbor name=\"" + neighborNames[neigh] + "\" ip=\"" + address + "\" port=\"" + str(ip) +"\" />\n"
 	neighborSection = neighborSection + "\t</neighbors>\n"
 	cSection = "\t<constraints nbConstraints =\"" + str(nbCons) + "\">\n" + cSection + "\t</constraints>\n"	
 	print("got out of big loop")
@@ -245,7 +258,11 @@ for index in range(0, int(numAgents)): #for each agent file separately
 	agentFileStrings[index] = agentFileStrings[index] + varSection + "\n" + relSection + "\n" +  "\n" + cSection + "\n" + "\n" + neighborSection + "\n</agent>"
 	print("got past after")
 	print(agentFileStrings[index])
-	agentFile = open("test/agents/a_" + str(index) + ".xml", "w")
+	#NOTE: changed output directory here
+	if not os.path.exists("probs/agents/" + sys.argv[2]):
+		os.makedirs("probs/agents/" + sys.argv[2])
+	agentFile = open("probs/agents/" + sys.argv[2] + "/a_" + str(index) + ".xml", "w") #open("test/agents/a_" + str(index) + ".xml", "w")
+	
 	agentFile.write(str(agentFileStrings[index]))
 	agentFile.close()
 	neighborSection = ""
