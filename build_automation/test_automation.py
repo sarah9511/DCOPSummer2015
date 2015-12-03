@@ -64,14 +64,15 @@ for i in range(0, int(numProblems)):
 		os.system("scp -r " + targetDir + " pi@" + piips[j] + ":/home/pi/4_agents/test/agents" )
 
 classpath = "\"/home/pi/4_agents/lib/akka-actor_2.11-2.3.9.jar:/home/pi/4_agents/lib/config-1.2.1.jar:/home/pi/4_agents/lib/protobuf-java-2.5.0.jar:/home/pi/4_agents/lib/akka-remote_2.11-2.3.9.jar:/home/pi/4_agents/lib/netty-3.8.0.Final.jar:/home/pi/4_agents/lib/scala-library-2.11.5.jar:/home/pi/4_agents/lib/mysql-connector-java-5.1.37-bin.jar:/home/pi/4_agents/bin:/home/pi/4_agents/test\""
+
+
+
 #os.system("java -cp \"/home/pi/4_agents/lib/akka-actor_2.11-2.3.9.jar:/home/pi/4_agents/lib/config-1.2.1.jar:/home/pi/4_agents/lib/protobuf-java-2.5.0.jar:/home/pi/4_agents/lib/akka-remote_2.11-2.3.9.jar:/home/pi/4_agents/lib/netty-3.8.0.Final.jar:/home/pi/4_agents/lib/scala-library-2.11.5.jar:/home/pi/4_agents/lib/mysql-connector-java-5.1.37-bin.jar:/home/pi/4_agents/bin:/home/pi/4_agents/test\" smartgrids.AgentMonitor")
-
-
 
 for i in range(0, int(numProblems)): #for each problem
 	for j in range(0, int(numAgents)): #for each agent
-		procCommand = "ssh pi@" + piips[0] + " java -cp " + classpath + " smartgrids.AgentGenerator " + "/home/4_agents/test/agents/p_" + str(i) + filename_endings + "/a_" + str(j) + ".xml"   
-		print(procCommand)
-
+		procCommand = "ssh pi@" + piips[0] + " java -cp " + classpath + " smartgrids.AgentGenerator " + "/home/pi/4_agents/test/agents/p_" + str(i) + filename_endings + "/a_" + str(j) + ".xml"   
+		#print(procCommand)
+		os.system(procCommand + " &")
 
 
