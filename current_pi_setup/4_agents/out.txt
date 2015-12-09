@@ -1,0 +1,15 @@
+[INFO] [08/15/2015 03:21:12.245] [main] [Remoting] Starting remoting
+[INFO] [08/15/2015 03:21:17.046] [main] [Remoting] Remoting started; listening on addresses :[akka.tcp://a_0System@169.254.222.79:2552]
+[INFO] [08/15/2015 03:21:17.091] [main] [Remoting] Remoting now listens on addresses: [akka.tcp://a_0System@169.254.222.79:2552]
+Agent a_0 received identify
+Reporting to monitor
+a_0 is trying to connect with akka.tcp://a_1System@169.254.222.7:2553/user/a_1
+a_0 is trying to connect with akka.tcp://a_3System@169.254.116.68:2555/user/a_3
+a_0 is trying to connect with akka.tcp://a_2System@169.254.2.179:2554/user/a_2
+a_0 received actor identity
+a_0 received info request
+a_0 received actor identity
+a_0 received actor identity
+a_0 received info request
+a_0 received info request
+agent done
